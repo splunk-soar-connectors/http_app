@@ -19,6 +19,8 @@ import requests
 from requests.auth import AuthBase, HTTPBasicAuth
 from soar_sdk.exceptions import ActionFailure
 
+from .common import logger
+
 
 class Authorization(ABC):
     """
@@ -54,6 +56,7 @@ class BasicAuth(Authorization):
         self.password = asset.password
 
     def create_auth(self, headers):
+        logger.info("Using HTTP Basic auth to authenticate")
         return (self.username, self.password), headers
 
 
@@ -67,6 +70,7 @@ class TokenAuth(Authorization):
         self.auth_token = asset.auth_token
 
     def create_auth(self, headers):
+        logger.info("Using provided token to authenticate")
         if self.auth_token and self.auth_token_name not in headers:
             headers[self.auth_token_name] = self.auth_token
         return None, headers
@@ -89,6 +93,7 @@ class OAuth(Authorization):
         """
         Fetches a new OAuth access token and saves it to the app's auth_state.
         """
+        logger.info("Fetching new token")
         token_url = self.asset.oauth_token_url
         client_id = self.asset.client_id
         client_secret = self.asset.client_secret
@@ -115,7 +120,7 @@ class OAuth(Authorization):
             raise ActionFailure("Access token not found in response body")
 
         self.soar.auth_state[self.state_key] = access_token
-
+        logger.info("Successfully fetched and saved new OAuth token to auth_state.")
         return access_token
 
     def get_token(self, force_new: bool = False) -> str:
@@ -126,14 +131,18 @@ class OAuth(Authorization):
             force_new (bool): If True, forces a new token to be fetched,
                               ignoring any cached token.
         """
+        logger.info("Fetching access token")
         cached_token = self.soar.auth_state.get(self.state_key)
 
         if cached_token and not force_new:
+            logger.info("Using old token")
             return cached_token
 
         return self._generate_new_token()
 
     def create_auth(self, headers: dict) -> tuple[None, dict]:
+        logger.info("Using OAuth to authenticate")
+
         access_token = self.__get_token()
 
         headers["Authorization"] = f"Bearer {access_token}"
@@ -150,6 +159,7 @@ class NoAuth(Authorization):
         pass
 
     def create_auth(self, headers):
+        logger.info("No authentication method configured. Making an anonymous request.")
         return None, headers
 
 
