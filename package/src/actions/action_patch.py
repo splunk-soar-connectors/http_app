@@ -2,23 +2,25 @@ from soar_sdk.abstract import SOARClient
 from soar_sdk.params import Param
 
 from ..asset import Asset
-from ..classes import BaseHttpOutput, BaseHttpParams
 from ..common import logger
 from ..request_maker import make_request
+from ..schemas import BaseHttpOutput, BaseHttpParams
 
-action_description = "Perform a REST PATCH call to the server"
 action_type = "generic"
 
 
 class PatchDataParams(BaseHttpParams):
+
     body: str = Param(description="PATCH body (query string, JSON, etc.)", required=False)
 
 
 class PatchDataOutput(BaseHttpOutput):
+
     pass
 
 
 def patch_data(params: PatchDataParams, soar: SOARClient, asset: Asset) -> PatchDataOutput:
+    """Perform a REST PATCH call to the server."""
     logger.info("In action handler for: patch_data")
     return make_request(
         asset=asset,

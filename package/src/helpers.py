@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 from pydantic import ValidationError
 from soar_sdk.exceptions import ActionFailure
 
-from .classes import ParsedResponseBody
 from .common import logger
+from .schemas import ParsedResponseBody
 
 
 def process_xml_response(response) -> dict:
@@ -59,6 +59,11 @@ RESPONSE_HANDLERS = {
 
 
 def parse_headers(headers_str: Optional[str]) -> dict:
+    """
+    Parses a JSON string of headers into a dictionary.
+    Returns an empty dictionary if the input is empty or None.
+    Raises ActionFailure on parsing or validation errors.
+    """
     if headers_str is None:
         return {}
 
@@ -77,6 +82,10 @@ def parse_headers(headers_str: Optional[str]) -> dict:
 
 
 def handle_various_response(response):
+    """
+    Analyzes the response, routes it to the correct parser, and returns both
+    the parsed body and a raw text body for the final output.
+    """
     content_type = response.headers.get("Content-Type", "").lower()
     if not response.text.strip() or ("application/octet-stream" in content_type):
         return process_empty_response(content_type), ""

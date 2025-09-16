@@ -14,23 +14,23 @@
 from soar_sdk.abstract import SOARClient
 
 from ..asset import Asset
-from ..classes import BaseHttpOutput, BaseHttpParams
 from ..common import logger
 from ..request_maker import make_request
-
-action_type = "investigate"
-action_description = "This App facilitates making HTTP requests as actions"
+from ..schemas import BaseHttpOutput, BaseHttpParams
 
 
 class GetDataOutput(BaseHttpOutput):
+
     pass
 
 
 class GetDataParams(BaseHttpParams):
+
     pass
 
 
 def get_data(params: GetDataParams, soar: SOARClient, asset: Asset) -> GetDataOutput:
+    """Perform a REST GET call to the server."""
     logger.info("In action handler for: get_data")
     return make_request(
         asset=asset,

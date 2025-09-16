@@ -9,9 +9,13 @@ from soar_sdk.params import Param, Params
 
 from ..asset import Asset
 from ..auth import get_auth_method
+from ..common import logger
+
+VERBOSE = "Provide the file path and file name to download into the vault. For example, <b>/web_storage/file.tgz</b>."
 
 
 class GetFileParams(Params):
+
     hostname: str = Param(
         description="Hostname to execute command on",
         primary=True,
@@ -27,16 +31,15 @@ class GetFileParams(Params):
 
 
 class GetFileOutput(ActionOutput):
+
     vault_id: str
     file_name: str
 
 
-action_description = "Retrieve a file from the endpoint and save it to the vault"
-action_type = "investigate"
-verbose = "Provide the file path and file name to download into the vault. For example, <b>/web_storage/file.tgz</b>."
-
-
 def get_file(params: GetFileParams, soar: SOARClient, asset: Asset) -> GetFileOutput:
+    """Retrieve a file from the endpoint and save it to the vault."""
+    logger.info("In action handler for: get_file")
+
     hostname = params.hostname.strip(" ").strip("/") or asset.base_url
     file_path = params.file_path.strip()
     encoded_file_path = quote(file_path)
@@ -76,8 +79,9 @@ def get_file(params: GetFileParams, soar: SOARClient, asset: Asset) -> GetFileOu
             )
         ):
             raise ActionFailure("Failed to add file to vault.")
-
+        logger.info(f"Saving file to vault. name: {file_name}")
     except Exception as e:
         raise ActionFailure(f"An error occurred while saving the file to the vault. Details: {e}")
 
+    logger.info("File successfully retrieved and added to vault")
     return GetFileOutput(vault_id=new_vault_id, file_name=file_name)
