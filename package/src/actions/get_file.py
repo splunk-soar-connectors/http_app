@@ -11,9 +11,10 @@ from ..asset import Asset
 from ..auth import get_auth_method
 from ..common import logger
 
+VERBOSE = "Provide the file path and file name to download into the vault. For example, <b>/web_storage/file.tgz</b>."
+
 
 class GetFileParams(Params):
-    """Defines the input parameters for the 'Get File' action."""
 
     hostname: str = Param(
         description="Hostname to execute command on",
@@ -30,13 +31,9 @@ class GetFileParams(Params):
 
 
 class GetFileOutput(ActionOutput):
-    """Defines the structured output for the 'Get File' action."""
 
     vault_id: str
     file_name: str
-
-
-verbose = "Provide the file path and file name to download into the vault. For example, <b>/web_storage/file.tgz</b>."
 
 
 def get_file(params: GetFileParams, soar: SOARClient, asset: Asset) -> GetFileOutput:

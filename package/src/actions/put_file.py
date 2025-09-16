@@ -11,9 +11,10 @@ from ..asset import Asset
 from ..auth import get_auth_method
 from ..common import logger
 
+VERBOSE = "Provide the path to store the file on the file server. For example, <b>/web_storage/test_repo/</b>."
+
 
 class PutFileParams(Params):
-    """Defines the input parameters for the 'Put File' action."""
 
     host: str = Param(
         description="Hostname/IP with port number to execute command on",
@@ -31,12 +32,8 @@ class PutFileParams(Params):
 
 
 class PutFileOutput(ActionOutput):
-    """Defines the structured output for the 'Put File' action."""
 
     file_sent: str
-
-
-verbose = "Provide the path to store the file on the file server. For example, <b>/web_storage/test_repo/</b>."
 
 
 def put_file(params: PutFileParams, soar: SOARClient, asset: Asset) -> PutFileOutput:
@@ -54,11 +51,13 @@ def put_file(params: PutFileParams, soar: SOARClient, asset: Asset) -> PutFileOu
             )
         if file_name_to_send in params.file_destination:
             raise ActionFailure("The filename should be excluded from the 'location' (file destination) parameter.")
+
+        base_url = params.host or asset.base_url
+        full_url = f"{base_url.rstrip('/')}/{params.file_destination.lstrip('/')}/{quote(file_name_to_send)}"
+        if not validators.url(full_url):
+            raise ActionFailure(f"Invalid URL constructed: {full_url}")
+
         with vault_attachment.open() as f:
-            base_url = params.host or asset.base_url
-            full_url = f"{base_url.rstrip('/')}/{params.file_destination.lstrip('/')}/{quote(file_name_to_send)}"
-            if not validators.url(full_url):
-                raise ActionFailure(f"Invalid URL constructed: {full_url}")
             auth_strategy = get_auth_method(asset, soar)
             auth_object, final_headers = auth_strategy.create_auth({})
             files_payload = {"file": f}

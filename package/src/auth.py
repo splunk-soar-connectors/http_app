@@ -17,8 +17,10 @@ from typing import Optional, Tuple
 
 import requests
 from requests.auth import AuthBase, HTTPBasicAuth
+from soar_sdk.abstract import SOARClient
 from soar_sdk.exceptions import ActionFailure
 
+from .asset import Asset
 from .common import logger
 
 
@@ -163,20 +165,13 @@ class NoAuth(Authorization):
         return None, headers
 
 
-def get_auth_method(asset, soar_client):
+def get_auth_method(asset: Asset, soar_client: SOARClient):
     """
     Factory function to select and instantiate the appropriate auth strategy.
 
     Based on the provided asset configuration, this function determines which
     authentication method to use (Basic, Token, OAuth, or None) and returns
     an instance of the corresponding strategy class.
-
-    Args:
-        asset (Asset): The asset configuration object.
-        soar_client (SOARClient): The SOAR client, needed for stateful strategies like OAuth.
-
-    Returns:
-        Authorization: An instance of a class that implements the Authorization strategy.
     """
     if asset.username and asset.password:
         return BasicAuth(asset)

@@ -14,23 +14,17 @@
 from soar_sdk.abstract import SOARClient
 
 from ..asset import Asset
-from ..classes import BaseHttpOutput, BaseHttpParams
 from ..common import logger
 from ..request_maker import make_request
+from ..schemas import BaseHttpOutput, BaseHttpParams
 
 
 class GetDataOutput(BaseHttpOutput):
-    """
-    Defines the structured output for the 'GET Request' action.
-    """
 
     pass
 
 
 class GetDataParams(BaseHttpParams):
-    """
-    Defines the input parameters for the 'GET Request' action.
-    """
 
     pass
 

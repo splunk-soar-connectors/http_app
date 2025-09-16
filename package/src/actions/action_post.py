@@ -2,23 +2,17 @@ from soar_sdk.abstract import SOARClient
 from soar_sdk.params import Param
 
 from ..asset import Asset
-from ..classes import BaseHttpOutput, BaseHttpParams
 from ..common import logger
 from ..request_maker import make_request
+from ..schemas import BaseHttpOutput, BaseHttpParams
 
 
 class PostDataOutput(BaseHttpOutput):
-    """
-    Defines the structured output for the 'POST Request' action.
-    """
 
     pass
 
 
 class PostDataParams(BaseHttpParams):
-    """
-    Defines the input parameters for the 'POST Request' action.
-    """
 
     body: str = Param(description="POST body (query string, JSON, etc.)", required=False)
 

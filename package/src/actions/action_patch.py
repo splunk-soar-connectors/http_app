@@ -2,25 +2,19 @@ from soar_sdk.abstract import SOARClient
 from soar_sdk.params import Param
 
 from ..asset import Asset
-from ..classes import BaseHttpOutput, BaseHttpParams
 from ..common import logger
 from ..request_maker import make_request
+from ..schemas import BaseHttpOutput, BaseHttpParams
 
 action_type = "generic"
 
 
 class PatchDataParams(BaseHttpParams):
-    """
-    Defines the input parameters for the 'PATCH Request' action.
-    """
 
     body: str = Param(description="PATCH body (query string, JSON, etc.)", required=False)
 
 
 class PatchDataOutput(BaseHttpOutput):
-    """
-    Defines the structured output for the 'PATCH Request' action.
-    """
 
     pass
 

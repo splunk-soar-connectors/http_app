@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 from pydantic import ValidationError
 from soar_sdk.exceptions import ActionFailure
 
-from .classes import ParsedResponseBody
 from .common import logger
+from .schemas import ParsedResponseBody
 
 
 def process_xml_response(response) -> dict:

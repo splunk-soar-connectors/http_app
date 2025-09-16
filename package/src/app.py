@@ -3,9 +3,9 @@ from soar_sdk.app import App
 
 from .actions import action_delete, action_get, action_head, action_options, action_patch, action_post, action_put, get_file, put_file
 from .asset import Asset
-from .classes import EmptyOutput
 from .common import logger
 from .request_maker import make_request
+from .schemas import EmptyOutput
 
 app = App(
     name="HTTP",
@@ -47,8 +47,8 @@ app.register_action(action_patch.patch_data, action_type="generic", read_only=Fa
 app.register_action(action_delete.delete_data, action_type="generic", read_only=False)
 app.register_action(action_head.get_headers, action_type="investigate")
 app.register_action(action_options.get_options, action_type="investigate")
-app.register_action(put_file.put_file, action_type="generic", read_only=False, verbose=put_file.verbose)
-app.register_action(get_file.get_file, action_type="investigate", verbose=get_file.verbose)
+app.register_action(put_file.put_file, action_type="generic", read_only=False, verbose=put_file.VERBOSE)
+app.register_action(get_file.get_file, action_type="investigate", verbose=get_file.VERBOSE)
 
 
 if __name__ == "__main__":

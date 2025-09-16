@@ -1,23 +1,17 @@
 from soar_sdk.abstract import SOARClient
 
 from ..asset import Asset
-from ..classes import BaseHttpOutput, BaseHttpParams
 from ..common import logger
 from ..request_maker import make_request
+from ..schemas import BaseHttpOutput, BaseHttpParams
 
 
 class GetOptionsParams(BaseHttpParams):
-    """
-    Defines the input parameters for the 'OPTIONS Request' action.
-    """
 
     pass
 
 
 class GetOptionsOutput(BaseHttpOutput):
-    """
-    Defines the structured output for the 'OPTIONS Request' action.
-    """
 
     pass
 
