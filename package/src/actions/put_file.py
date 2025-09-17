@@ -1,3 +1,16 @@
+# Copyright (c) 2025 Splunk Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 from urllib.parse import quote
 
 import requests
@@ -15,24 +28,26 @@ VERBOSE = "Provide the path to store the file on the file server. For example, <
 
 
 class PutFileParams(Params):
-
     host: str = Param(
         description="Hostname/IP with port number to execute command on",
         primary=True,
         cef_types=["host name"],
     )
-    vault_id: str = Param(description="Vault ID of file", primary=True, cef_types=["vault id"])
+    vault_id: str = Param(
+        description="Vault ID of file", primary=True, cef_types=["vault id"]
+    )
     file_destination: str = Param(
         description="File destination path (exclude filename)",
         primary=True,
         cef_types=["file path"],
     )
     file_name: str = Param(description="Name of the file to be put on endpoint")
-    verify_certificate: bool = Param(description="Verify certificates (if using HTTPS)", default=False)
+    verify_certificate: bool = Param(
+        description="Verify certificates (if using HTTPS)", default=False
+    )
 
 
 class PutFileOutput(ActionOutput):
-
     file_sent: str
 
 
@@ -42,7 +57,9 @@ def put_file(params: PutFileParams, soar: SOARClient, asset: Asset) -> PutFileOu
     try:
         logger.info(f"Fetching phantom vault details for vault_id: {params.vault_id}")
         if not (attachments := soar.vault.get_attachment(vault_id=params.vault_id)):
-            raise ActionFailure(f"File with vault_id '{params.vault_id}' not found in vault.")
+            raise ActionFailure(
+                f"File with vault_id '{params.vault_id}' not found in vault."
+            )
         vault_attachment = attachments[0]
         file_name_to_send = params.file_name or vault_attachment.name
         if params.file_name and vault_attachment.name != params.file_name:
@@ -50,7 +67,9 @@ def put_file(params: PutFileParams, soar: SOARClient, asset: Asset) -> PutFileOu
                 f"Provided file_name '{params.file_name}' does not match the name in vault '{vault_attachment.name}'. Using provided name."
             )
         if file_name_to_send in params.file_destination:
-            raise ActionFailure("The filename should be excluded from the 'location' (file destination) parameter.")
+            raise ActionFailure(
+                "The filename should be excluded from the 'location' (file destination) parameter."
+            )
 
         base_url = params.host or asset.base_url
         full_url = f"{base_url.rstrip('/')}/{params.file_destination.lstrip('/')}/{quote(file_name_to_send)}"

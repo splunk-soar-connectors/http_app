@@ -1,3 +1,16 @@
+# Copyright (c) 2025 Splunk Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 from typing import Optional
 
 import requests
@@ -36,7 +49,11 @@ def make_request(
 
     logger.info(f"Making {method} request to: {full_url}")
 
-    body = UnicodeDammit(body).unicode_markup.encode("utf-8") if isinstance(body, str) else body
+    body = (
+        UnicodeDammit(body).unicode_markup.encode("utf-8")
+        if isinstance(body, str)
+        else body
+    )
 
     retries = 1
     response = None
@@ -60,8 +77,15 @@ def make_request(
             break
 
         except requests.exceptions.RequestException as e:
-            if isinstance(auth_method, OAuth) and e.response and e.response.status_code == 401 and retries > 0:
-                logger.warning("Request failed with 401, token might be expired. Forcing a refresh.")
+            if (
+                isinstance(auth_method, OAuth)
+                and e.response
+                and e.response.status_code == 401
+                and retries > 0
+            ):
+                logger.warning(
+                    "Request failed with 401, token might be expired. Forcing a refresh."
+                )
                 auth_method.get_token(force_new=True)
                 retries -= 1
                 continue

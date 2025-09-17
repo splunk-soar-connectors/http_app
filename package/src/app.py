@@ -1,7 +1,30 @@
+# Copyright (c) 2025 Splunk Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 from soar_sdk.abstract import SOARClient
 from soar_sdk.app import App
 
-from .actions import action_delete, action_get, action_head, action_options, action_patch, action_post, action_put, get_file, put_file
+from .actions import (
+    action_delete,
+    action_get,
+    action_head,
+    action_options,
+    action_patch,
+    action_post,
+    action_put,
+    get_file,
+    put_file,
+)
 from .asset import Asset
 from .common import logger
 from .request_maker import make_request
@@ -47,8 +70,12 @@ app.register_action(action_patch.patch_data, action_type="generic", read_only=Fa
 app.register_action(action_delete.delete_data, action_type="generic", read_only=False)
 app.register_action(action_head.get_headers, action_type="investigate")
 app.register_action(action_options.get_options, action_type="investigate")
-app.register_action(put_file.put_file, action_type="generic", read_only=False, verbose=put_file.VERBOSE)
-app.register_action(get_file.get_file, action_type="investigate", verbose=get_file.VERBOSE)
+app.register_action(
+    put_file.put_file, action_type="generic", read_only=False, verbose=put_file.VERBOSE
+)
+app.register_action(
+    get_file.get_file, action_type="investigate", verbose=get_file.VERBOSE
+)
 
 
 if __name__ == "__main__":
