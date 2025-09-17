@@ -37,8 +37,8 @@ app = App(
     logo_dark="logo_dark.svg",
     product_vendor="Generic",
     product_name="HTTP",
-    publisher="Splunk Inc.",
-    appid="dc312038-005f-470f-badb-8a353ba9bb5b",
+    publisher="Splunk",
+    appid="290b7499-0374-4930-9cdc-5e9b05d65827",
     fips_compliant=False,
     asset_cls=Asset,
 )
