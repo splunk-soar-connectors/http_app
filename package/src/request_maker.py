@@ -90,11 +90,11 @@ def make_request(
                 retries -= 1
                 continue
             else:
-                raise ActionFailure(f"Request failed for {full_url}. Details: {e}")
+                raise ActionFailure(f"Request failed for {full_url}. Details: {e}") from e
 
     parsed_body, raw_body = helpers.handle_various_response(response)
-    logger.info(f"Successfully processed data. Status: {response.status_code}")
-
+    logger.info("Successfully processed data")
+    soar.set_message(f"Status code: {response.status_code}")
     return output(
         status_code=response.status_code,
         location=full_url,

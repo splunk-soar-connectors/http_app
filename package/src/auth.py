@@ -13,7 +13,7 @@
 # limitations under the License.
 import json
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple
+from typing import Optional
 
 import requests
 from requests.auth import AuthBase, HTTPBasicAuth
@@ -33,7 +33,7 @@ class Authorization(ABC):
     """
 
     @abstractmethod
-    def create_auth(self, headers) -> Tuple[Optional[AuthBase], dict]:
+    def create_auth(self, headers) -> tuple[Optional[AuthBase], dict]:
         """
         Prepares authentication components for an HTTP request.
 

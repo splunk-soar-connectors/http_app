@@ -39,9 +39,7 @@ class GetFileParams(Params):
         primary=True,
         cef_types=["file path"],
     )
-    verify_certificate: bool = Param(
-        description="Verify certificates (if using HTTPS)", default=False
-    )
+    verify_certificate: bool = Param(description="Verify certificates (if using HTTPS)", default=False)
 
 
 class GetFileOutput(ActionOutput):
@@ -59,9 +57,7 @@ def get_file(params: GetFileParams, soar: SOARClient, asset: Asset) -> GetFileOu
     validate_url = f"{hostname}/{encoded_file_path}"
 
     if not validators.url(validate_url):
-        raise ActionFailure(
-            f"Invalid URL constructed based on hostname and file_path: {validate_url}"
-        )
+        raise ActionFailure(f"Invalid URL constructed based on hostname and file_path: {validate_url}")
     full_url = f"{hostname}/{file_path}"
 
     file_name = unquote_plus(file_path.split("/")[-1])
@@ -79,7 +75,7 @@ def get_file(params: GetFileParams, soar: SOARClient, asset: Asset) -> GetFileOu
         )
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        raise ActionFailure(f"Failed to download file from {full_url}. Details: {e}")
+        raise ActionFailure(f"Failed to download file from {full_url}. Details: {e}") from e
 
     try:
         file_content = response.content
@@ -99,9 +95,7 @@ def get_file(params: GetFileParams, soar: SOARClient, asset: Asset) -> GetFileOu
             raise ActionFailure("Failed to add file to vault.")
         logger.info(f"Saving file to vault. name: {file_name}")
     except Exception as e:
-        raise ActionFailure(
-            f"An error occurred while saving the file to the vault. Details: {e}"
-        )
+        raise ActionFailure(f"An error occurred while saving the file to the vault. Details: {e}") from e
 
     logger.info("File successfully retrieved and added to vault")
     return GetFileOutput(vault_id=new_vault_id, file_name=file_name)

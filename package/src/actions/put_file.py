@@ -93,9 +93,9 @@ def put_file(params: PutFileParams, soar: SOARClient, asset: Asset) -> PutFileOu
             )
             response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        raise ActionFailure(f"Failed to upload file to {full_url}. Details: {e}")
+        raise ActionFailure(f"Failed to upload file to {full_url}. Details: {e}") from e
     except Exception as e:
-        raise ActionFailure(f"An unexpected error occurred. Details: {e}")
+        raise ActionFailure(f"An unexpected error occurred. Details: {e}") from e
     logger.info(f"File successfully uploaded. Server status: {response.status_code}")
     return PutFileOutput(
         file_sent=full_url,

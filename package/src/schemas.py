@@ -44,9 +44,6 @@ class BaseHttpOutput(GenericActionOutput):
     )
     response_headers: str
 
-    def generate_action_summary_message(self) -> str:
-        return f"Status code: {self.status_code}"
-
 
 class BaseHttpParams(Params):
     """Base class for all standard action parameters."""
