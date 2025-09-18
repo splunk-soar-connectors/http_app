@@ -13,7 +13,7 @@
 # limitations under the License.
 import json
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple
+from typing import Optional
 
 import requests
 from requests.auth import AuthBase, HTTPBasicAuth
@@ -33,7 +33,7 @@ class Authorization(ABC):
     """
 
     @abstractmethod
-    def create_auth(self, headers) -> Tuple[Optional[AuthBase], dict]:
+    def create_auth(self, headers) -> tuple[Optional[AuthBase], dict]:
         """
         Prepares authentication components for an HTTP request.
 
@@ -89,7 +89,7 @@ class OAuth(Authorization):
     def __init__(self, asset, soar_client):
         self.asset = asset
         self.soar = soar_client
-        self.state_key = f"oauth_token_{asset.asset_id}"
+        self.state_key = f"oauth_token_{self.soar.get_asset_id()}"
 
     def _generate_new_token(self):
         """
@@ -114,9 +114,13 @@ class OAuth(Authorization):
             access_token = json.loads(response.text).get("access_token")
 
         except requests.exceptions.RequestException as e:
-            raise ActionFailure(f"Error fetching OAuth token from {token_url}. Details: {e}") from e
+            raise ActionFailure(
+                f"Error fetching OAuth token from {token_url}. Details: {e}"
+            ) from e
         except json.JSONDecodeError as e:
-            raise ActionFailure("Error parsing response from server while fetching token") from e
+            raise ActionFailure(
+                "Error parsing response from server while fetching token"
+            ) from e
 
         if not access_token:
             raise ActionFailure("Access token not found in response body")
@@ -145,7 +149,7 @@ class OAuth(Authorization):
     def create_auth(self, headers: dict) -> tuple[None, dict]:
         logger.info("Using OAuth to authenticate")
 
-        access_token = self.__get_token()
+        access_token = self.get_token()
 
         headers["Authorization"] = f"Bearer {access_token}"
 
