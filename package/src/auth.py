@@ -17,10 +17,8 @@ from typing import Optional
 
 import requests
 from requests.auth import AuthBase, HTTPBasicAuth
-from soar_sdk.abstract import SOARClient
 from soar_sdk.exceptions import ActionFailure
 
-from .asset import Asset
 from .common import logger
 
 
@@ -86,10 +84,11 @@ class OAuth(Authorization):
     app's authentication state, and adds it to the request as a Bearer token.
     """
 
-    def __init__(self, asset, soar_client):
+    def __init__(self, asset, soar_client, actions_manager):
         self.asset = asset
         self.soar = soar_client
         self.state_key = f"oauth_token_{self.soar.get_asset_id()}"
+        self.actions_manager = actions_manager
 
     def _generate_new_token(self):
         """
@@ -125,7 +124,7 @@ class OAuth(Authorization):
         if not access_token:
             raise ActionFailure("Access token not found in response body")
 
-        self.soar.auth_state[self.state_key] = access_token
+        self.actions_manager.auth_state[self.state_key] = access_token
         logger.info("Successfully fetched and saved new OAuth token to auth_state.")
         return access_token
 
@@ -138,7 +137,7 @@ class OAuth(Authorization):
                               ignoring any cached token.
         """
         logger.info("Fetching access token")
-        cached_token = self.soar.auth_state.get(self.state_key)
+        cached_token = self.actions_manager.auth_state.get(self.state_key)
 
         if cached_token and not force_new:
             logger.info("Using old token")
@@ -167,20 +166,3 @@ class NoAuth(Authorization):
     def create_auth(self, headers):
         logger.info("No authentication method configured. Making an anonymous request.")
         return None, headers
-
-
-def get_auth_method(asset: Asset, soar_client: SOARClient):
-    """
-    Factory function to select and instantiate the appropriate auth strategy.
-
-    Based on the provided asset configuration, this function determines which
-    authentication method to use (Basic, Token, OAuth, or None) and returns
-    an instance of the corresponding strategy class.
-    """
-    if asset.username and asset.password:
-        return BasicAuth(asset)
-    elif asset.auth_token_name and asset.auth_token:
-        return TokenAuth(asset)
-    elif asset.oauth_token_url and asset.client_id:
-        return OAuth(asset, soar_client)
-    return NoAuth(asset)

@@ -21,7 +21,7 @@ from soar_sdk.exceptions import ActionFailure
 
 from . import helpers
 from .asset import Asset
-from .auth import OAuth, get_auth_method
+from .auth import OAuth
 from .common import logger
 
 
@@ -59,6 +59,8 @@ def make_request(
     response = None
 
     while retries >= 0:
+        from .app import get_auth_method
+
         auth_method = get_auth_method(asset, soar)
         auth_object, final_headers = auth_method.create_auth(parsed_headers)
 
@@ -90,7 +92,9 @@ def make_request(
                 retries -= 1
                 continue
             else:
-                raise ActionFailure(f"Request failed for {full_url}. Details: {e}")
+                raise ActionFailure(
+                    f"Request failed for {full_url}. Details: {e}"
+                ) from e
 
     parsed_body, raw_body = helpers.handle_various_response(response)
     logger.info(f"Successfully processed data. Status: {response.status_code}")

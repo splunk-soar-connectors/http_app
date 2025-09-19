@@ -27,8 +27,9 @@ from .actions import (
 )
 from .asset import Asset
 from .common import logger
-from .request_maker import make_request
 from .schemas import EmptyOutput
+from .auth import BasicAuth, TokenAuth, OAuth, NoAuth
+from .request_maker import make_request
 
 app = App(
     name="HTTP",
@@ -47,6 +48,7 @@ app = App(
 @app.test_connectivity()
 def test_connectivity(soar: SOARClient, asset: Asset) -> None:
     """Validate connection using the configured credentials."""
+
     logger.info("In action handler for: test_connectivity")
 
     make_request(
@@ -76,6 +78,23 @@ app.register_action(
 app.register_action(
     get_file.get_file, action_type="investigate", verbose=get_file.VERBOSE
 )
+
+
+def get_auth_method(asset: Asset, soar_client: SOARClient):
+    """
+    Factory function to select and instantiate the appropriate auth strategy.
+
+    Based on the provided asset configuration, this function determines which
+    authentication method to use (Basic, Token, OAuth, or None) and returns
+    an instance of the corresponding strategy class.
+    """
+    if asset.username and asset.password:
+        return BasicAuth(asset)
+    elif asset.auth_token_name and asset.auth_token:
+        return TokenAuth(asset)
+    elif asset.oauth_token_url and asset.client_id:
+        return OAuth(asset, soar_client, app.actions_manager)
+    return NoAuth(asset)
 
 
 if __name__ == "__main__":

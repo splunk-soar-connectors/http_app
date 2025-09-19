@@ -21,7 +21,6 @@ from soar_sdk.exceptions import ActionFailure
 from soar_sdk.params import Param, Params
 
 from ..asset import Asset
-from ..auth import get_auth_method
 from ..common import logger
 
 VERBOSE = "Provide the file path and file name to download into the vault. For example, <b>/web_storage/file.tgz</b>."
@@ -66,6 +65,8 @@ def get_file(params: GetFileParams, soar: SOARClient, asset: Asset) -> GetFileOu
 
     file_name = unquote_plus(file_path.split("/")[-1])
 
+    from ..app import get_auth_method
+
     auth_strategy = get_auth_method(asset, soar)
     auth_object, final_headers = auth_strategy.create_auth({})
 
@@ -79,7 +80,9 @@ def get_file(params: GetFileParams, soar: SOARClient, asset: Asset) -> GetFileOu
         )
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        raise ActionFailure(f"Failed to download file from {full_url}. Details: {e}")
+        raise ActionFailure(
+            f"Failed to download file from {full_url}. Details: {e}"
+        ) from e
 
     try:
         file_content = response.content
@@ -101,7 +104,7 @@ def get_file(params: GetFileParams, soar: SOARClient, asset: Asset) -> GetFileOu
     except Exception as e:
         raise ActionFailure(
             f"An error occurred while saving the file to the vault. Details: {e}"
-        )
+        ) from e
 
     logger.info("File successfully retrieved and added to vault")
     return GetFileOutput(vault_id=new_vault_id, file_name=file_name)

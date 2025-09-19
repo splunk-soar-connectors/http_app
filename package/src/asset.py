@@ -42,7 +42,7 @@ class Asset(BaseAsset):
     )
     client_id: str = AssetField(required=False, description="Client ID (for OAuth)")
     client_secret: str = AssetField(
-        required=False, description="Client Secret (for OAuth)"
+        required=False, description="Client Secret (for OAuth)", sensitive=True
     )
     timeout: float = AssetField(required=False, description="Timeout for HTTP calls")
     test_http_method: str = AssetField(

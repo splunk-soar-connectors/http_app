@@ -21,7 +21,6 @@ from soar_sdk.exceptions import ActionFailure
 from soar_sdk.params import Param, Params
 
 from ..asset import Asset
-from ..auth import get_auth_method
 from ..common import logger
 
 VERBOSE = "Provide the path to store the file on the file server. For example, <b>/web_storage/test_repo/</b>."
@@ -77,6 +76,8 @@ def put_file(params: PutFileParams, soar: SOARClient, asset: Asset) -> PutFileOu
             raise ActionFailure(f"Invalid URL constructed: {full_url}")
 
         with vault_attachment.open() as f:
+            from ..app import get_auth_method
+
             auth_strategy = get_auth_method(asset, soar)
             auth_object, final_headers = auth_strategy.create_auth({})
             files_payload = {"file": f}
@@ -93,9 +94,9 @@ def put_file(params: PutFileParams, soar: SOARClient, asset: Asset) -> PutFileOu
             )
             response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        raise ActionFailure(f"Failed to upload file to {full_url}. Details: {e}")
+        raise ActionFailure(f"Failed to upload file to {full_url}. Details: {e}") from e
     except Exception as e:
-        raise ActionFailure(f"An unexpected error occurred. Details: {e}")
+        raise ActionFailure(f"An unexpected error occurred. Details: {e}") from e
     logger.info(f"File successfully uploaded. Server status: {response.status_code}")
     return PutFileOutput(
         file_sent=full_url,
