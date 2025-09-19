@@ -29,13 +29,13 @@ class Asset(BaseAsset):
         default="ph-auth-token",
     )
     auth_token: str = AssetField(
-        required=False, description="Value of authentication token"
+        required=False, description="Value of authentication token", sensitive=True
     )
     username: str = AssetField(
         required=False, description="Username (for HTTP basic auth)"
     )
     password: str = AssetField(
-        required=False, description="Password (for HTTP basic auth)"
+        required=False, description="Password (for HTTP basic auth)", sensitive=True
     )
     oauth_token_url: str = AssetField(
         required=False, description="URL to fetch oauth token from"

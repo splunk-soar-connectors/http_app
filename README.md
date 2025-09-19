@@ -1,10 +1,10 @@
 # HTTP
 
 Publisher: Splunk <br>
-Connector Version: 3.7.9 <br>
+Connector Version: 4.0.0 <br>
 Product Vendor: Generic <br>
 Product Name: HTTP <br>
-Minimum Product Version: 6.2.1
+Minimum Product Version: 6.4.0
 
 This App facilitates making HTTP requests as actions
 
@@ -39,25 +39,25 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 
 ### Supported Actions
 
-[test connectivity](#action-test-connectivity) - Validate connection using the configured credentials <br>
-[put data](#action-put-data) - Perform a REST PUT call to the server <br>
-[patch data](#action-patch-data) - Perform a REST PATCH call to the server <br>
-[delete data](#action-delete-data) - Perform a REST DELETE call to the server <br>
-[get headers](#action-get-headers) - Perform a REST HEAD call to the server <br>
-[get options](#action-get-options) - Perform a REST OPTIONS call to the server <br>
-[get data](#action-get-data) - Perform a REST GET call to the server <br>
-[post data](#action-post-data) - Perform a REST POST call to the server <br>
-[get file](#action-get-file) - Retrieve a file from the endpoint and save it to the vault <br>
-[put file](#action-put-file) - Put a file from the vault to another location
+[test connectivity](#action-test-connectivity) - Validate connection using the configured credentials. <br>
+[get data](#action-get-data) - Perform a REST GET call to the server. <br>
+[post data](#action-post-data) - Perform a REST POST call to the server. <br>
+[put data](#action-put-data) - Perform a REST PUT call to the server. <br>
+[patch data](#action-patch-data) - Perform a REST PATCH call to the server. <br>
+[delete data](#action-delete-data) - Perform a REST DELETE call to the server. <br>
+[get headers](#action-get-headers) - Perform a REST HEAD call to the server. <br>
+[get options](#action-get-options) - Perform a REST OPTIONS call to the server. <br>
+[put file](#action-put-file) - Put a file from the vault to another location. <br>
+[get file](#action-get-file) - Retrieve a file from the endpoint and save it to the vault.
 
 ## action: 'test connectivity'
 
-Validate connection using the configured credentials
+Validate connection using the configured credentials.
 
 Type: **test** <br>
 Read only: **True**
 
-This action will perform a GET on the configured <b>base_url</b>. The action will succeed if given a status code between 200 and 399 (inclusive). Therefore, if the given base URL requires no authentication, this action may pass even if the supplied credentials are incorrect. Alternately, if the given base URL does not point to a valid endpoint, this action could fail even if other actions may succeed with valid <b>location</b> parameters.
+Basic test for app.
 
 #### Action Parameters
 
@@ -65,185 +65,16 @@ No parameters are required for this action
 
 #### Action Output
 
-No Output
-
-## action: 'put data'
-
-Perform a REST PUT call to the server
-
-Type: **generic** <br>
-Read only: **False**
-
-#### Action Parameters
-
-PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
---------- | -------- | ----------- | ---- | --------
-**location** | required | Location (e.g. path/to/endpoint?query=string) | string | `endpoint` |
-**body** | required | PATCH body (query string, JSON, etc.) | string | |
-**verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
-**headers** | optional | Additional headers (JSON object with headers) | string | |
-
-#### Action Output
-
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
-action_result.status | string | | success failed |
-action_result.parameter.body | string | | {"name": "Bad IP"} |
-action_result.parameter.headers | string | | {"Content-Type": "application/json"} |
-action_result.parameter.location | string | `endpoint` | /rest/assets |
-action_result.parameter.verify_certificate | boolean | | False True |
-action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
-action_result.data.\*.method | string | | PUT |
-action_result.data.\*.parsed_response_body | string | | {"failed": true, "message": "Requested item not found"} |
-action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
-action_result.data.\*.response_headers | string | | |
-action_result.summary.reason | string | | Not Found |
-action_result.summary.status_code | numeric | | 404 |
-action_result.message | string | | Can't process response from server. Status Code: 404 Data from server: {"failed": true, "message": "Requested item not found"} |
-summary.total_objects | numeric | | 1 |
-summary.total_objects_successful | numeric | | 0 |
-
-## action: 'patch data'
-
-Perform a REST PATCH call to the server
-
-Type: **generic** <br>
-Read only: **False**
-
-#### Action Parameters
-
-PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
---------- | -------- | ----------- | ---- | --------
-**location** | required | Location (e.g. path/to/endpoint?query=string) | string | `endpoint` |
-**body** | optional | PATCH body (query string, JSON, etc.) | string | |
-**verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
-**headers** | optional | Additional headers (JSON object with headers) | string | |
-
-#### Action Output
-
-DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
---------- | ---- | -------- | --------------
-action_result.status | string | | success failed |
-action_result.parameter.body | string | | {"name": "Bad IP"} |
-action_result.parameter.headers | string | | {"Content-Type": "application/json"} |
-action_result.parameter.location | string | `endpoint` | /rest/assets |
-action_result.parameter.verify_certificate | boolean | | False True |
-action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
-action_result.data.\*.method | string | | PATCH |
-action_result.data.\*.parsed_response_body | string | | {"failed": true, "message": "Requested item not found"} |
-action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
-action_result.data.\*.response_headers | string | | |
-action_result.summary.reason | string | | Not Found |
-action_result.summary.status_code | numeric | | 404 |
-action_result.message | string | | Can't process response from server. Status Code: 404 Data from server: {"failed": true, "message": "Requested item not found"} |
-summary.total_objects | numeric | | 1 |
-summary.total_objects_successful | numeric | | 0 |
-
-## action: 'delete data'
-
-Perform a REST DELETE call to the server
-
-Type: **generic** <br>
-Read only: **False**
-
-#### Action Parameters
-
-PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
---------- | -------- | ----------- | ---- | --------
-**location** | required | Location (e.g. path/to/endpoint?query=string) | string | `endpoint` |
-**body** | optional | DELETE body (query string, JSON, etc.) | string | |
-**verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
-**headers** | optional | Additional headers (JSON object with headers) | string | |
-
-#### Action Output
-
-DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
---------- | ---- | -------- | --------------
-action_result.status | string | | success failed |
-action_result.parameter.body | string | | {"name": "Bad IP"} |
-action_result.parameter.headers | string | | {"Content-Type": "application/json"} |
-action_result.parameter.location | string | `endpoint` | /rest/assets |
-action_result.parameter.verify_certificate | boolean | | False True |
-action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
-action_result.data.\*.method | string | | DELETE |
-action_result.data.\*.parsed_response_body | string | | {"failed": true, "message": "Requested item not found"} |
-action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
-action_result.data.\*.response_headers | string | | |
-action_result.summary.reason | string | | Not Found |
-action_result.summary.status_code | numeric | | 404 |
-action_result.message | string | | Can't process response from server. Status Code: 404 Data from server: {"failed": true, "message": "Requested item not found"} |
-summary.total_objects | numeric | | 1 |
-summary.total_objects_successful | numeric | | 0 |
-
-## action: 'get headers'
-
-Perform a REST HEAD call to the server
-
-Type: **investigate** <br>
-Read only: **True**
-
-#### Action Parameters
-
-PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
---------- | -------- | ----------- | ---- | --------
-**location** | required | Location (e.g. path/to/endpoint?query=string) | string | `endpoint` |
-**verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
-**headers** | optional | Additional headers (JSON object with headers) | string | |
-
-#### Action Output
-
-DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
---------- | ---- | -------- | --------------
-action_result.status | string | | success failed |
-action_result.parameter.headers | string | | {"User-Agent": "automation"} |
-action_result.parameter.location | string | `endpoint` | /rest/cont |
-action_result.parameter.verify_certificate | boolean | | False True |
-action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/cont |
-action_result.data.\*.method | string | | HEAD |
-action_result.data.\*.response_headers | string | | |
-action_result.summary.reason | string | | OK |
-action_result.summary.status_code | numeric | | 200 |
-action_result.message | string | | Status code: 200, Reason: OK |
-summary.total_objects | numeric | | 1 |
-summary.total_objects_successful | numeric | | 1 |
-
-## action: 'get options'
-
-Perform a REST OPTIONS call to the server
-
-Type: **investigate** <br>
-Read only: **True**
-
-#### Action Parameters
-
-PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
---------- | -------- | ----------- | ---- | --------
-**location** | required | Location (e.g. path/to/endpoint?query=string) | string | `endpoint` |
-**verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
-**headers** | optional | Additional headers (JSON object with headers) | string | |
-
-#### Action Output
-
-DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
---------- | ---- | -------- | --------------
-action_result.status | string | | success failed |
-action_result.parameter.headers | string | | |
-action_result.parameter.location | string | `endpoint` | /rest/cont |
-action_result.parameter.verify_certificate | boolean | | False True |
-action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/cont |
-action_result.data.\*.method | string | | OPTIONS |
-action_result.data.\*.parsed_response_body | string | | GET,HEAD,PUT,POST,DELETE,PATCH |
-action_result.data.\*.response_body | string | | GET,HEAD,PUT,POST,DELETE,PATCH |
-action_result.data.\*.response_headers | string | | |
-action_result.summary.reason | string | | OK |
-action_result.summary.status_code | numeric | | 200 |
-action_result.message | string | | Status code: 200, Reason: OK |
+action_result.status | string | | success failure |
+action_result.message | string | | |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 
 ## action: 'get data'
 
-Perform a REST GET call to the server
+Perform a REST GET call to the server.
 
 Type: **investigate** <br>
 Read only: **True**
@@ -252,7 +83,7 @@ Read only: **True**
 
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**location** | required | Location (e.g. path/to/endpoint?query=string) | string | `endpoint` |
+**location** | required | Location (e.g. path/to/endpoint) | string | `endpoint` |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
 
@@ -260,24 +91,22 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
-action_result.status | string | | success failed |
-action_result.parameter.headers | string | | {"Content-Type": "application/json"} |
-action_result.parameter.location | string | `endpoint` | /rest/cont |
-action_result.parameter.verify_certificate | boolean | | False True |
-action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/cont |
-action_result.data.\*.method | string | | GET |
-action_result.data.\*.parsed_response_body | string | | {"failed": true, "message": "Requested item not found"} |
+action_result.status | string | | success failure |
+action_result.message | string | | |
+action_result.parameter.location | string | `endpoint` | |
+action_result.parameter.verify_certificate | boolean | | |
+action_result.parameter.headers | string | | |
+action_result.data.\*.status_code | numeric | | 200 404 500 |
 action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
+action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
+action_result.data.\*.method | string | | POST |
 action_result.data.\*.response_headers | string | | |
-action_result.summary.reason | string | | Not Found |
-action_result.summary.status_code | numeric | | 404 |
-action_result.message | string | | Can't process response from server. Status Code: 404 Data from server: {"failed": true, "message": "Requested item not found"} |
 summary.total_objects | numeric | | 1 |
-summary.total_objects_successful | numeric | | 0 |
+summary.total_objects_successful | numeric | | 1 |
 
 ## action: 'post data'
 
-Perform a REST POST call to the server
+Perform a REST POST call to the server.
 
 Type: **generic** <br>
 Read only: **False**
@@ -287,7 +116,142 @@ Read only: **False**
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
 **location** | required | Location (e.g. path/to/endpoint) | string | `endpoint` |
+**verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
+**headers** | optional | Additional headers (JSON object with headers) | string | |
 **body** | optional | POST body (query string, JSON, etc.) | string | |
+
+#### Action Output
+
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string | | success failure |
+action_result.message | string | | |
+action_result.parameter.location | string | `endpoint` | |
+action_result.parameter.verify_certificate | boolean | | |
+action_result.parameter.headers | string | | |
+action_result.parameter.body | string | | |
+action_result.data.\*.status_code | numeric | | 200 404 500 |
+action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
+action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
+action_result.data.\*.method | string | | POST |
+action_result.data.\*.response_headers | string | | |
+summary.total_objects | numeric | | 1 |
+summary.total_objects_successful | numeric | | 1 |
+
+## action: 'put data'
+
+Perform a REST PUT call to the server.
+
+Type: **generic** <br>
+Read only: **False**
+
+#### Action Parameters
+
+PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
+--------- | -------- | ----------- | ---- | --------
+**location** | required | Location (e.g. path/to/endpoint) | string | `endpoint` |
+**verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
+**headers** | optional | Additional headers (JSON object with headers) | string | |
+**body** | optional | PATCH body (query string, JSON, etc.) | string | |
+
+#### Action Output
+
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string | | success failure |
+action_result.message | string | | |
+action_result.parameter.location | string | `endpoint` | |
+action_result.parameter.verify_certificate | boolean | | |
+action_result.parameter.headers | string | | |
+action_result.parameter.body | string | | |
+action_result.data.\*.status_code | numeric | | 200 404 500 |
+action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
+action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
+action_result.data.\*.method | string | | POST |
+action_result.data.\*.response_headers | string | | |
+summary.total_objects | numeric | | 1 |
+summary.total_objects_successful | numeric | | 1 |
+
+## action: 'patch data'
+
+Perform a REST PATCH call to the server.
+
+Type: **generic** <br>
+Read only: **False**
+
+#### Action Parameters
+
+PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
+--------- | -------- | ----------- | ---- | --------
+**location** | required | Location (e.g. path/to/endpoint) | string | `endpoint` |
+**verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
+**headers** | optional | Additional headers (JSON object with headers) | string | |
+**body** | optional | PATCH body (query string, JSON, etc.) | string | |
+
+#### Action Output
+
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string | | success failure |
+action_result.message | string | | |
+action_result.parameter.location | string | `endpoint` | |
+action_result.parameter.verify_certificate | boolean | | |
+action_result.parameter.headers | string | | |
+action_result.parameter.body | string | | |
+action_result.data.\*.status_code | numeric | | 200 404 500 |
+action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
+action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
+action_result.data.\*.method | string | | POST |
+action_result.data.\*.response_headers | string | | |
+summary.total_objects | numeric | | 1 |
+summary.total_objects_successful | numeric | | 1 |
+
+## action: 'delete data'
+
+Perform a REST DELETE call to the server.
+
+Type: **generic** <br>
+Read only: **False**
+
+#### Action Parameters
+
+PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
+--------- | -------- | ----------- | ---- | --------
+**location** | required | Location (e.g. path/to/endpoint) | string | `endpoint` |
+**verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
+**headers** | optional | Additional headers (JSON object with headers) | string | |
+**body** | optional | DELETE body (query string, JSON, etc.) | string | |
+
+#### Action Output
+
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string | | success failure |
+action_result.message | string | | |
+action_result.parameter.location | string | `endpoint` | |
+action_result.parameter.verify_certificate | boolean | | |
+action_result.parameter.headers | string | | |
+action_result.parameter.body | string | | |
+action_result.data.\*.status_code | numeric | | 200 404 500 |
+action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
+action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
+action_result.data.\*.method | string | | POST |
+action_result.data.\*.response_headers | string | | |
+summary.total_objects | numeric | | 1 |
+summary.total_objects_successful | numeric | | 1 |
+
+## action: 'get headers'
+
+Perform a REST HEAD call to the server.
+
+Type: **investigate** <br>
+Read only: **True**
+
+#### Action Parameters
+
+PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
+--------- | -------- | ----------- | ---- | --------
+**location** | required | Location (e.g. path/to/endpoint) | string | `endpoint` |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
 
@@ -295,59 +259,54 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
-action_result.status | string | | success failed |
-action_result.parameter.body | string | | {"name": "Bad IP"} |
-action_result.parameter.headers | string | | {"Content-Type": "application/json"} |
-action_result.parameter.location | string | `endpoint` | /rest/assets |
-action_result.parameter.verify_certificate | boolean | | False True |
+action_result.status | string | | success failure |
+action_result.message | string | | |
+action_result.parameter.location | string | `endpoint` | |
+action_result.parameter.verify_certificate | boolean | | |
+action_result.parameter.headers | string | | |
+action_result.data.\*.status_code | numeric | | 200 404 500 |
+action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
 action_result.data.\*.method | string | | POST |
-action_result.data.\*.parsed_response_body | string | | {"failed": true, "message": "Requested item not found"} |
-action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.response_headers | string | | |
-action_result.summary.reason | string | | Not Found |
-action_result.summary.status_code | numeric | | 404 |
-action_result.message | string | | Can't process response from server. Status Code: 404 Data from server: {"failed": true, "message": "Requested item not found"} |
 summary.total_objects | numeric | | 1 |
-summary.total_objects_successful | numeric | | 0 |
+summary.total_objects_successful | numeric | | 1 |
 
-## action: 'get file'
+## action: 'get options'
 
-Retrieve a file from the endpoint and save it to the vault
+Perform a REST OPTIONS call to the server.
 
 Type: **investigate** <br>
 Read only: **True**
-
-Provide the file path and file name to download into the vault. For example, <b>/web_storage/file.tgz</b>.
 
 #### Action Parameters
 
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**hostname** | optional | Hostname to execute command on | string | `host name` |
-**file_path** | required | Path of the file to download (include filename) | string | `file path` |
+**location** | required | Location (e.g. path/to/endpoint) | string | `endpoint` |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
+**headers** | optional | Additional headers (JSON object with headers) | string | |
 
 #### Action Output
 
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
-action_result.status | string | | success failed |
-action_result.parameter.file_path | string | `file path` | /web_storage/file.tgz |
-action_result.parameter.verify_certificate | boolean | | False True |
-action_result.parameter.hostname | string | `host name` | http://192.168.0.1 |
-action_result.data | string | | |
-action_result.summary.exit_status | numeric | | 0 |
-action_result.summary.name | string | | file.tgz |
-action_result.summary.size | numeric | | 412 |
-action_result.summary.vault_id | string | `vault id` | dc871f816c4d179f3a3cea24b4bc81a67562c |
-action_result.message | string | | Transferred file |
+action_result.status | string | | success failure |
+action_result.message | string | | |
+action_result.parameter.location | string | `endpoint` | |
+action_result.parameter.verify_certificate | boolean | | |
+action_result.parameter.headers | string | | |
+action_result.data.\*.status_code | numeric | | 200 404 500 |
+action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
+action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
+action_result.data.\*.method | string | | POST |
+action_result.data.\*.response_headers | string | | |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 
 ## action: 'put file'
 
-Put a file from the vault to another location
+Put a file from the vault to another location.
 
 Type: **generic** <br>
 Read only: **False**
@@ -358,25 +317,55 @@ Provide the path to store the file on the file server. For example, <b>/web_stor
 
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**host** | optional | Hostname/IP with port number to execute command on | string | `host name` |
+**host** | required | Hostname/IP with port number to execute command on | string | `host name` |
 **vault_id** | required | Vault ID of file | string | `vault id` |
 **file_destination** | required | File destination path (exclude filename) | string | `file path` |
-**file_name** | optional | Name of the file to be put on endpoint | string | |
-**verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
+**file_name** | required | Name of the file to be put on endpoint | string | |
+**verify_certificate** | required | Verify certificates (if using HTTPS) | boolean | |
 
 #### Action Output
 
 DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
 --------- | ---- | -------- | --------------
-action_result.status | string | | success failed |
-action_result.parameter.file_name | string | | test.txt |
-action_result.parameter.file_destination | string | `file path` | /web_storage/test_repo/ |
-action_result.parameter.host | string | `host name` | http://192.168.0.1:8001 |
-action_result.parameter.verify_certificate | boolean | | False True |
-action_result.parameter.vault_id | string | `vault id` | dc871f816c4d179f3a3cea24b4bc81a67562c |
-action_result.data | string | | |
-action_result.summary.file_sent | string | `file path` | http://192.168.0.1:8001/web_storage/test_repo/file.tgz |
-action_result.message | string | | File sent: http://192.168.0.1:8001/web_storage/test_repo/file.tgz |
+action_result.status | string | | success failure |
+action_result.message | string | | |
+action_result.parameter.host | string | `host name` | |
+action_result.parameter.vault_id | string | `vault id` | |
+action_result.parameter.file_destination | string | `file path` | |
+action_result.parameter.file_name | string | | |
+action_result.parameter.verify_certificate | boolean | | |
+action_result.data.\*.file_sent | string | | |
+summary.total_objects | numeric | | 1 |
+summary.total_objects_successful | numeric | | 1 |
+
+## action: 'get file'
+
+Retrieve a file from the endpoint and save it to the vault.
+
+Type: **investigate** <br>
+Read only: **True**
+
+Provide the file path and file name to download into the vault. For example, <b>/web_storage/file.tgz</b>.
+
+#### Action Parameters
+
+PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
+--------- | -------- | ----------- | ---- | --------
+**hostname** | required | Hostname to execute command on | string | `hostname` |
+**file_path** | required | Path of the file to download (include filename) | string | `file path` |
+**verify_certificate** | required | Verify certificates (if using HTTPS) | boolean | |
+
+#### Action Output
+
+DATA PATH | TYPE | CONTAINS | EXAMPLE VALUES
+--------- | ---- | -------- | --------------
+action_result.status | string | | success failure |
+action_result.message | string | | |
+action_result.parameter.hostname | string | `hostname` | |
+action_result.parameter.file_path | string | `file path` | |
+action_result.parameter.verify_certificate | boolean | | |
+action_result.data.\*.vault_id | string | | |
+action_result.data.\*.file_name | string | | |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 

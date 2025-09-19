@@ -20,12 +20,10 @@ from ..schemas import BaseHttpOutput, BaseHttpParams
 
 
 class GetDataOutput(BaseHttpOutput):
-
     pass
 
 
 class GetDataParams(BaseHttpParams):
-
     pass
 
 

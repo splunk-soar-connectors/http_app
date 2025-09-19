@@ -27,18 +27,20 @@ def process_xml_response(response) -> dict:
     try:
         return xmltodict.parse(response.text)
     except Exception as e:
-        raise ActionFailure(f"Unable to parse XML response. Error: {e}")
+        raise ActionFailure(f"Unable to parse XML response. Error: {e}") from e
 
 
 def process_json_response(response) -> dict:
     try:
         return ParsedResponseBody(**response.json())
     except json.JSONDecodeError as e:
-        raise ActionFailure(f"Server claimed JSON but failed to parse. Error: {e}")
+        raise ActionFailure(
+            f"Server claimed JSON but failed to parse. Error: {e}"
+        ) from e
     except ValidationError as e:
         raise ActionFailure(
             f"Response JSON did not match expected structure. Details: {e}"
-        )
+        ) from e
 
 
 def process_html_response(response) -> ParsedResponseBody:
@@ -52,7 +54,7 @@ def process_html_response(response) -> ParsedResponseBody:
         return ParsedResponseBody(**data_dict)
 
     except Exception as e:
-        raise ActionFailure(f"Unable to parse HTML response. Error: {e}")
+        raise ActionFailure(f"Unable to parse HTML response. Error: {e}") from e
 
 
 def process_empty_response(content_type) -> dict:
@@ -94,7 +96,7 @@ def parse_headers(headers_str: Optional[str]) -> dict:
             f"Failed to parse headers. Ensure it's a valid JSON object. Error: {e}"
         )
         logger.error(error_message)
-        raise ActionFailure(error_message)
+        raise ActionFailure(error_message) from e
 
     if not isinstance(parsed_headers, dict):
         raise ActionFailure(

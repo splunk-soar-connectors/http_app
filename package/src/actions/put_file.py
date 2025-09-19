@@ -83,7 +83,8 @@ def put_file(params: PutFileParams, soar: SOARClient, asset: Asset) -> PutFileOu
             files_payload = {"file": f}
             query_params = {"file_path": params.file_destination}
             logger.info(f"Uploading file '{file_name_to_send}' to: {full_url}")
-            response = requests.post(
+            response = requests.request(
+                method="POST",
                 uri=full_url,
                 auth=auth_object,
                 headers=final_headers,

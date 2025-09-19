@@ -71,7 +71,8 @@ def get_file(params: GetFileParams, soar: SOARClient, asset: Asset) -> GetFileOu
     auth_object, final_headers = auth_strategy.create_auth({})
 
     try:
-        response = requests.get(
+        response = requests.request(
+            method="GET",
             url=full_url,
             auth=auth_object,
             headers=final_headers,
@@ -89,7 +90,7 @@ def get_file(params: GetFileParams, soar: SOARClient, asset: Asset) -> GetFileOu
         if not file_content:
             raise ActionFailure("Downloaded file is empty.")
 
-        container_id_to_use = soar.get_container_id()
+        container_id_to_use = soar.get_executing_container_id()
 
         if not (
             new_vault_id := soar.vault.create_attachment(
