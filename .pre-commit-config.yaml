@@ -58,22 +58,6 @@ repos:
         args: ['--no-verify']
         exclude_types: [json]
         exclude: "README.md"
-  - repo: local
-    hooks:
-      - id: generate-sdk-manifest
-        name: Generate SDK app manifest
-        entry: |
-          bash -c '
-          UV_LOCK_PATH=$(find . -name "uv.lock" -type f | head -1)
-          export UV_LOCK_DIR=$(dirname "$UV_LOCK_PATH")
-          echo "UV_LOCK_DIR $UV_LOCK_DIR"
-          soarapps manifests create sdk_app_manifest.json "$UV_LOCK_DIR"
-          echo "Generated sdk_app_manifest.json"
-          '
-        language: system
-        pass_filenames: false
-        always_run: true
-
   # Central hooks
   - repo: https://github.com/phantomcyber/dev-cicd-tools
     rev: tapishj/fix-sdkify-pre-commit
@@ -81,7 +65,7 @@ repos:
       - id: build-docs
         language: python
         additional_dependencies: ["local-hooks"]
-        args: ['.', '--json-name', 'sdk_app_manifest.json']
+        args: ['.']
       - id: copyright
         language: python
         additional_dependencies: ["local-hooks"]
@@ -98,11 +82,3 @@ repos:
         language: python
         additional_dependencies: ["local-hooks"]
         args: ['.']
-  - repo: local
-    hooks:
-      - id: cleanup-sdk-manifest
-        name: Clean up SDK app manifest
-        entry: bash -c 'if [ -f sdk_app_manifest.json ]; then rm sdk_app_manifest.json && echo "Removed sdk_app_manifest.json"; fi'
-        language: system
-        pass_filenames: false
-        always_run: true
