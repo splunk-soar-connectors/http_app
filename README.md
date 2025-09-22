@@ -34,6 +34,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **oauth_token_url** | optional | string | URL to fetch oauth token from |
 **client_id** | optional | string | Client ID (for OAuth) |
 **client_secret** | optional | password | Client Secret (for OAuth) |
+**scope** | optional | string | Scope for OAuth |
 **timeout** | optional | numeric | Timeout for HTTP calls |
 **test_http_method** | optional | string | HTTP Method for Test Connectivity |
 

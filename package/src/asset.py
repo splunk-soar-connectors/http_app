@@ -44,6 +44,7 @@ class Asset(BaseAsset):
     client_secret: str = AssetField(
         required=False, description="Client Secret (for OAuth)", sensitive=True
     )
+    scope: str = AssetField(required=False, description="Scope for OAuth")
     timeout: float = AssetField(required=False, description="Timeout for HTTP calls")
     test_http_method: str = AssetField(
         required=False,
