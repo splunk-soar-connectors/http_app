@@ -23,6 +23,8 @@ from . import helpers
 from .asset import Asset
 from .auth import OAuth, get_auth_method
 from .common import logger
+from contextlib import nullcontext
+from .helpers import temp_cert_files
 
 
 def make_request(
@@ -49,48 +51,40 @@ def make_request(
 
     logger.info(f"Making {method} request to: {full_url}")
 
-    body = (
-        UnicodeDammit(body).unicode_markup.encode("utf-8")
-        if isinstance(body, str)
-        else body
-    )
+    cert_manager = temp_cert_files(asset) if (asset.client_cert and asset.client_key) else nullcontext()
 
-    retries = 1
-    response = None
+    body = UnicodeDammit(body).unicode_markup.encode("utf-8") if isinstance(body, str) else body
+    with cert_manager as cert_param:
+        retries = 1
+        response = None
 
-    while retries >= 0:
-        auth_method = get_auth_method(asset, soar)
-        auth_object, final_headers = auth_method.create_auth(parsed_headers)
+        while retries >= 0:
+            auth_method = get_auth_method(asset, soar)
+            auth_object, final_headers = auth_method.create_auth(parsed_headers)
 
-        try:
-            response = requests.request(
-                method=method,
-                url=full_url,
-                auth=auth_object,
-                data=body,
-                verify=verify,
-                headers=final_headers,
-                timeout=asset.timeout,
-            )
-            response.raise_for_status()
-
-            break
-
-        except requests.exceptions.RequestException as e:
-            if (
-                isinstance(auth_method, OAuth)
-                and e.response
-                and e.response.status_code == 401
-                and retries > 0
-            ):
-                logger.warning(
-                    "Request failed with 401, token might be expired. Forcing a refresh."
+            try:
+                response = requests.request(
+                    method=method,
+                    url=full_url,
+                    auth=auth_object,
+                    data=body,
+                    verify=verify,
+                    headers=final_headers,
+                    cert=cert_param,
+                    timeout=asset.timeout,
                 )
-                auth_method.get_token(force_new=True)
-                retries -= 1
-                continue
-            else:
-                raise ActionFailure(f"Request failed for {full_url}. Details: {e}")
+                response.raise_for_status()
+
+                break
+
+            except requests.exceptions.RequestException as e:
+                if isinstance(auth_method, OAuth) and e.response and e.response.status_code == 401 and retries > 0:
+                    logger.warning("Request failed with 401, token might be expired. Forcing a refresh.")
+                    auth_method.get_token(force_new=True)
+                    retries -= 1
+                    continue
+                else:
+                    raise ActionFailure(f"Request failed for {full_url}. Details: {e}")
 
     parsed_body, raw_body = helpers.handle_various_response(response)
     logger.info(f"Successfully processed data. Status: {response.status_code}")

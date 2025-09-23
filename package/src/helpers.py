@@ -122,13 +122,13 @@ def handle_various_response(response):
 
 
 @contextmanager
-def _temp_cert_files(asset: Asset):
+def temp_cert_files(asset: Asset):
     """
     Safely creates temporary files for a client certificate and key from Base64 strings
     and yields their paths. Cleans up the files automatically.
     """
     if not (asset.public_cert and asset.private_key):
-        yield None
+        yield (None, None)
         return
 
     cert_path, key_path = None, None
