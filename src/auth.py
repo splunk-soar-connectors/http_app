@@ -95,25 +95,36 @@ class OAuth(Authorization):
         Fetches a new OAuth access token and saves it to the app's auth_state.
         """
         logger.info("Fetching new token")
+        
+        # Check if we have authorization_url (indicates authorization code flow)
+        if self.asset.authorization_url:
+            return self._handle_authorization_code_flow()
+        else:
+            return self._handle_client_credentials_flow()
+
+    def _handle_client_credentials_flow(self):
+        """
+        Implements OAuth 2.0 Client Credentials Grant Flow.
+        """
+        logger.info("Using Client Credentials flow")
         token_url = self.asset.oauth_token_url
         client_id = self.asset.client_id
         client_secret = self.asset.client_secret
         scope = self.asset.scope
 
-        payload = {"grant_type": "client_credentials"}
+        payload = {
+            "grant_type": "client_credentials",
+            "client_id": client_id,
+            "client_secret": client_secret,
+        }
         if scope:
             payload["scope"] = scope
 
         try:
-            response = requests.post(
-                token_url,
-                auth=HTTPBasicAuth(client_id, client_secret),
-                data=payload,
-                timeout=30,
-            )
+            response = requests.post(token_url, data=payload, timeout=30)
             response.raise_for_status()
-
-            access_token = json.loads(response.text).get("access_token")
+            token_data = response.json()
+            access_token = token_data.get("access_token")
 
         except requests.exceptions.RequestException as e:
             raise ActionFailure(
@@ -129,6 +140,92 @@ class OAuth(Authorization):
 
         self.actions_manager.auth_state[self.state_key] = access_token
         logger.info("Successfully fetched and saved new OAuth token to auth_state.")
+        return access_token
+
+    def _handle_authorization_code_flow(self):
+        """
+        Implements OAuth 2.0 Authorization Code Grant Flow.
+        
+        NOTE: This requires user interaction and is complex in SOAR environment.
+        """
+        logger.info("Using Authorization Code flow")
+        
+        # Check if we already have an authorization code in auth_state
+        auth_code_key = f"oauth_auth_code_{self.soar.get_asset_id()}"
+        auth_code = self.actions_manager.auth_state.get(auth_code_key)
+        
+        if not auth_code:
+            # Generate authorization URL for user to visit
+            auth_url = self._generate_authorization_url()
+            raise ActionFailure(
+                f"Authorization Code Flow requires user interaction. "
+                f"Please visit this URL to authorize the app: {auth_url}\n"
+                f"After authorization, save the 'code' parameter from the callback URL "
+                f"to the app's auth_state with key '{auth_code_key}' and retry."
+            )
+        
+        # Exchange authorization code for access token
+        return self._exchange_code_for_token(auth_code)
+
+    def _generate_authorization_url(self):
+        """
+        Generates the authorization URL for user to visit.
+        """
+        import urllib.parse
+        
+        params = {
+            "response_type": "code",
+            "client_id": self.asset.client_id,
+            "redirect_uri": self.asset.redirect_uri,
+            "scope": self.asset.scope or "",
+            "state": f"soar_asset_{self.soar.get_asset_id()}"  # CSRF protection
+        }
+        
+        # Remove empty parameters
+        params = {k: v for k, v in params.items() if v}
+        
+        query_string = urllib.parse.urlencode(params)
+        return f"{self.asset.authorization_url}?{query_string}"
+
+    def _exchange_code_for_token(self, auth_code):
+        """
+        Exchanges authorization code for access token.
+        """
+        token_url = self.asset.token_endpoint or self.asset.oauth_token_url
+        
+        payload = {
+            "grant_type": "authorization_code",
+            "code": auth_code,
+            "client_id": self.asset.client_id,
+            "client_secret": self.asset.client_secret,
+            "redirect_uri": self.asset.redirect_uri,
+        }
+
+        try:
+            response = requests.post(token_url, data=payload, timeout=30)
+            response.raise_for_status()
+            token_data = response.json()
+            access_token = token_data.get("access_token")
+
+        except requests.exceptions.RequestException as e:
+            raise ActionFailure(
+                f"Error exchanging auth code for token from {token_url}. Details: {e}"
+            ) from e
+        except json.JSONDecodeError as e:
+            raise ActionFailure(
+                "Error parsing token response from server"
+            ) from e
+
+        if not access_token:
+            raise ActionFailure("Access token not found in token response")
+
+        # Save access token and clear the auth code (one-time use)
+        self.actions_manager.auth_state[self.state_key] = access_token
+        auth_code_key = f"oauth_auth_code_{self.soar.get_asset_id()}"
+        if auth_code_key in self.actions_manager.auth_state:
+            del self.actions_manager.auth_state[auth_code_key]
+        
+        logger.info("Successfully exchanged auth code for access token.")
         return access_token
 
     def get_token(self, force_new: bool = False) -> str:

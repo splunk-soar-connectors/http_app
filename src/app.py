@@ -30,6 +30,7 @@ from .common import logger
 from .schemas import EmptyOutput
 from .auth import BasicAuth, TokenAuth, OAuth, NoAuth
 from .request_maker import make_request
+from soar_sdk.webhooks.models import WebhookRequest, WebhookResponse
 
 app = App(
     name="HTTP",
@@ -63,6 +64,14 @@ def test_connectivity(soar: SOARClient, asset: Asset) -> None:
     )
 
     logger.info("Test connectivity passed!")
+    
+@app.webhook()
+def oauth_callback(WebhookRequest[Asset], asset_id: str) -> WebhookResponse:
+    """
+    Handle OAuth callback from the OAuth provider.
+    """
+    logger.info("In action handler for: oauth_callback")
+    pass
 
 
 app.register_action(action_get.get_data, action_type="investigate")

@@ -44,6 +44,12 @@ class Asset(BaseAsset):
     client_secret: str = AssetField(
         required=False, description="Client Secret (for OAuth)", sensitive=True
     )
+    authorization_url: str = AssetField(
+        required=False, description="URL where users will be redirected to log in and approve app access"
+    )
+    redirect_uri: str = AssetField(
+        required=False, description="Redirect URI registered with OAuth provider (must match exactly)"
+    )
     scope: str = AssetField(required=False, description="Scope for OAuth")
     timeout: float = AssetField(required=False, description="Timeout for HTTP calls")
     test_http_method: str = AssetField(
