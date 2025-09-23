@@ -122,20 +122,20 @@ def handle_various_response(response):
 
 
 @contextmanager
-def temp_cert_files(asset: Asset):
+def temp_cert_files(cert_b64: str, key_b64: str):
     """
     Safely creates temporary files for a client certificate and key from Base64 strings
     and yields their paths. Cleans up the files automatically.
     """
-    if not (asset.public_cert and asset.private_key):
+    if not (cert_b64 and key_b64):
         yield (None, None)
         return
 
     cert_path, key_path = None, None
+    cert_bytes = base64.b64decode(asset.public_cert)
+    key_bytes = base64.b64decode(asset.private_key)
 
     try:
-        cert_bytes = base64.b64decode(asset.public_cert)
-        key_bytes = base64.b64decode(asset.private_key)
 
         with tempfile.NamedTemporaryFile(mode="wb", delete=False) as cert_f, tempfile.NamedTemporaryFile(mode="wb", delete=False) as key_f:
             cert_f.write(cert_bytes)

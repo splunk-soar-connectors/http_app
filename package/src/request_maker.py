@@ -23,7 +23,6 @@ from . import helpers
 from .asset import Asset
 from .auth import OAuth, get_auth_method
 from .common import logger
-from contextlib import nullcontext
 from .helpers import temp_cert_files
 
 
@@ -51,10 +50,9 @@ def make_request(
 
     logger.info(f"Making {method} request to: {full_url}")
 
-    cert_manager = temp_cert_files(asset) if (asset.client_cert and asset.client_key) else nullcontext()
-
     body = UnicodeDammit(body).unicode_markup.encode("utf-8") if isinstance(body, str) else body
-    with cert_manager as cert_param:
+
+    with temp_cert_files(asset.public_cert, asset.private_key) as cert_param:
         retries = 1
         response = None
 
