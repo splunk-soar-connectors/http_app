@@ -31,6 +31,7 @@ class GetFileParams(Params):
         description="Hostname to execute command on",
         primary=True,
         cef_types=["hostname"],
+        required=False,
     )
     file_path: str = Param(
         required=True,
@@ -39,7 +40,9 @@ class GetFileParams(Params):
         cef_types=["file path"],
     )
     verify_certificate: bool = Param(
-        description="Verify certificates (if using HTTPS)", default=False
+        description="Verify certificates (if using HTTPS)",
+        default=False,
+        required=False,
     )
 
 

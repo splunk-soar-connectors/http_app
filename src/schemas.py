@@ -55,6 +55,7 @@ class BaseHttpParams(Params):
         description="Location (e.g. path/to/endpoint)",
         primary=True,
         cef_types=["endpoint"],
+        required=True,
     )
     verify_certificate: bool = Param(
         description="Verify certificates (if using HTTPS)",

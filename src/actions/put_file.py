@@ -31,18 +31,27 @@ class PutFileParams(Params):
         description="Hostname/IP with port number to execute command on",
         primary=True,
         cef_types=["host name"],
+        required=False,
     )
     vault_id: str = Param(
-        description="Vault ID of file", primary=True, cef_types=["vault id"]
+        description="Vault ID of file",
+        primary=True,
+        cef_types=["vault id"],
+        required=True,
     )
     file_destination: str = Param(
         description="File destination path (exclude filename)",
         primary=True,
         cef_types=["file path"],
+        required=True,
     )
-    file_name: str = Param(description="Name of the file to be put on endpoint")
+    file_name: str = Param(
+        description="Name of the file to be put on endpoint", required=False
+    )
     verify_certificate: bool = Param(
-        description="Verify certificates (if using HTTPS)", default=False
+        description="Verify certificates (if using HTTPS)",
+        default=False,
+        required=False,
     )
 
 
@@ -71,11 +80,20 @@ def put_file(params: PutFileParams, soar: SOARClient, asset: Asset) -> PutFileOu
             )
 
         base_url = params.host or asset.base_url
-        full_url = f"{base_url.rstrip('/')}/{params.file_destination.lstrip('/')}/{quote(file_name_to_send)}"
+
+        # Handle root directory case
+        destination_path = params.file_destination.lstrip("/")
+        if destination_path:
+            full_url = (
+                f"{base_url.rstrip('/')}/{destination_path}/{quote(file_name_to_send)}"
+            )
+        else:
+            full_url = f"{base_url.rstrip('/')}/{quote(file_name_to_send)}"
+
         if not validators.url(full_url):
             raise ActionFailure(f"Invalid URL constructed: {full_url}")
 
-        with vault_attachment.open() as f:
+        with vault_attachment.open("rb") as f:
             from ..app import get_auth_method
 
             auth_strategy = get_auth_method(asset, soar)
@@ -85,7 +103,7 @@ def put_file(params: PutFileParams, soar: SOARClient, asset: Asset) -> PutFileOu
             logger.info(f"Uploading file '{file_name_to_send}' to: {full_url}")
             response = requests.request(
                 method="POST",
-                uri=full_url,
+                url=full_url,
                 auth=auth_object,
                 headers=final_headers,
                 params=query_params,

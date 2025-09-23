@@ -318,11 +318,11 @@ Provide the path to store the file on the file server. For example, <b>/web_stor
 
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**host** | required | Hostname/IP with port number to execute command on | string | `host name` |
+**host** | optional | Hostname/IP with port number to execute command on | string | `host name` |
 **vault_id** | required | Vault ID of file | string | `vault id` |
 **file_destination** | required | File destination path (exclude filename) | string | `file path` |
-**file_name** | required | Name of the file to be put on endpoint | string | |
-**verify_certificate** | required | Verify certificates (if using HTTPS) | boolean | |
+**file_name** | optional | Name of the file to be put on endpoint | string | |
+**verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 
 #### Action Output
 
@@ -352,9 +352,9 @@ Provide the file path and file name to download into the vault. For example, <b>
 
 PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 --------- | -------- | ----------- | ---- | --------
-**hostname** | required | Hostname to execute command on | string | `hostname` |
+**hostname** | optional | Hostname to execute command on | string | `hostname` |
 **file_path** | required | Path of the file to download (include filename) | string | `file path` |
-**verify_certificate** | required | Verify certificates (if using HTTPS) | boolean | |
+**verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 
 #### Action Output
 

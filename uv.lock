@@ -292,7 +292,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "splunk-soar-sdk", specifier = "==1.6.0" },
+    { name = "splunk-soar-sdk", specifier = "==1.6.2" },
     { name = "validators" },
     { name = "xmltodict" },
 ]
@@ -806,7 +806,7 @@ wheels = [
 
 [[package]]
 name = "splunk-soar-sdk"
-version = "1.6.0"
+version = "1.6.2"
 source = { registry = "https://pypi.python.org/simple" }
 dependencies = [
     { name = "beautifulsoup4", marker = "(python_full_version < '3.10' and platform_machine == 'arm64' and sys_platform == 'darwin') or (python_full_version >= '3.13' and platform_machine == 'arm64' and sys_platform == 'darwin') or (python_full_version < '3.10' and platform_machine == 'x86_64' and sys_platform == 'darwin') or (python_full_version >= '3.13' and platform_machine == 'x86_64' and sys_platform == 'darwin') or (python_full_version < '3.10' and platform_machine == 'aarch64' and sys_platform == 'linux') or (python_full_version >= '3.13' and platform_machine == 'aarch64' and sys_platform == 'linux') or (python_full_version < '3.10' and platform_machine == 'x86_64' and sys_platform == 'linux') or (python_full_version >= '3.13' and platform_machine == 'x86_64' and sys_platform == 'linux')" },
@@ -826,9 +826,9 @@ dependencies = [
     { name = "tqdm", marker = "(python_full_version < '3.10' and platform_machine == 'arm64' and sys_platform == 'darwin') or (python_full_version >= '3.13' and platform_machine == 'arm64' and sys_platform == 'darwin') or (python_full_version < '3.10' and platform_machine == 'x86_64' and sys_platform == 'darwin') or (python_full_version >= '3.13' and platform_machine == 'x86_64' and sys_platform == 'darwin') or (python_full_version < '3.10' and platform_machine == 'aarch64' and sys_platform == 'linux') or (python_full_version >= '3.13' and platform_machine == 'aarch64' and sys_platform == 'linux') or (python_full_version < '3.10' and platform_machine == 'x86_64' and sys_platform == 'linux') or (python_full_version >= '3.13' and platform_machine == 'x86_64' and sys_platform == 'linux')" },
     { name = "typer", marker = "(python_full_version < '3.10' and platform_machine == 'arm64' and sys_platform == 'darwin') or (python_full_version >= '3.13' and platform_machine == 'arm64' and sys_platform == 'darwin') or (python_full_version < '3.10' and platform_machine == 'x86_64' and sys_platform == 'darwin') or (python_full_version >= '3.13' and platform_machine == 'x86_64' and sys_platform == 'darwin') or (python_full_version < '3.10' and platform_machine == 'aarch64' and sys_platform == 'linux') or (python_full_version >= '3.13' and platform_machine == 'aarch64' and sys_platform == 'linux') or (python_full_version < '3.10' and platform_machine == 'x86_64' and sys_platform == 'linux') or (python_full_version >= '3.13' and platform_machine == 'x86_64' and sys_platform == 'linux')" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1b/6a/4585168d711424aa03b476669e4c6c9c142f44f6f4bfb2b654f8897b4ef1/splunk_soar_sdk-1.6.0.tar.gz", hash = "sha256:0c897d350607a73e4e06cb4ad062c478e2ad43310015dfe47b73cb883671fb8c", size = 519230, upload-time = "2025-09-18T21:52:07.567Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ed/2c/fb4b4b5e1ad99fcd7ac28ccbdab2d5e4e030c6e489ba7d2a7e031dd36b57/splunk_soar_sdk-1.6.2.tar.gz", hash = "sha256:39290b449ae53a3135fe5b1b75364c5fd5ed6391b7bf1b0f3aaa251a888c5c1e", size = 519668, upload-time = "2025-09-22T22:05:16.434Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/dd/56/6f38602d07f75ae31f7e8b24f43bcf32c616d9a87848089c3485e6133a66/splunk_soar_sdk-1.6.0-py3-none-any.whl", hash = "sha256:57e2da6b250e1a4ed423fd8ff0c0ed36c661ffcd022342db08ad4fdc016bd46f", size = 157925, upload-time = "2025-09-18T21:52:05.812Z" },
+    { url = "https://files.pythonhosted.org/packages/36/5e/1d9db724700c3b0688490fbb12de90621f8de6515b901342659675e0035b/splunk_soar_sdk-1.6.2-py3-none-any.whl", hash = "sha256:a86990305be1d418d009df024ee561e2c8ca9074fc4a3e153f1bd133b829da1a", size = 158063, upload-time = "2025-09-22T22:05:15.007Z" },
 ]
 
 [[package]]
