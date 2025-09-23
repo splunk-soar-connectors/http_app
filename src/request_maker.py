@@ -79,12 +79,7 @@ def make_request(
             break
 
         except requests.exceptions.RequestException as e:
-            if (
-                isinstance(auth_method, OAuth)
-                and e.response
-                and e.response.status_code == 401
-                and retries > 0
-            ):
+            if isinstance(auth_method, OAuth) and retries > 0:
                 logger.warning(
                     "Request failed with 401, token might be expired. Forcing a refresh."
                 )

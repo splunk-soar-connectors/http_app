@@ -98,8 +98,11 @@ class OAuth(Authorization):
         token_url = self.asset.oauth_token_url
         client_id = self.asset.client_id
         client_secret = self.asset.client_secret
+        scope = self.asset.scope
 
         payload = {"grant_type": "client_credentials"}
+        if scope:
+            payload["scope"] = scope
 
         try:
             response = requests.post(
