@@ -28,22 +28,12 @@ class Asset(BaseAsset):
         description="Type of authentication token",
         default="ph-auth-token",
     )
-    auth_token: str = AssetField(
-        required=False, description="Value of authentication token"
-    )
-    username: str = AssetField(
-        required=False, description="Username (for HTTP basic auth)"
-    )
-    password: str = AssetField(
-        required=False, description="Password (for HTTP basic auth)"
-    )
-    oauth_token_url: str = AssetField(
-        required=False, description="URL to fetch oauth token from"
-    )
+    auth_token: str = AssetField(required=False, description="Value of authentication token")
+    username: str = AssetField(required=False, description="Username (for HTTP basic auth)")
+    password: str = AssetField(required=False, description="Password (for HTTP basic auth)")
+    oauth_token_url: str = AssetField(required=False, description="URL to fetch oauth token from")
     client_id: str = AssetField(required=False, description="Client ID (for OAuth)")
-    client_secret: str = AssetField(
-        required=False, description="Client Secret (for OAuth)"
-    )
+    client_secret: str = AssetField(required=False, description="Client Secret (for OAuth)")
     timeout: float = AssetField(required=False, description="Timeout for HTTP calls")
     test_http_method: str = AssetField(
         required=False,
@@ -60,3 +50,5 @@ class Asset(BaseAsset):
             "PATCH",
         ],
     )
+    public_cert: str = AssetField(required=False, sensitive=True, description="Public part of the client certificate")
+    private_key: str = AssetField(required=False, sensitive=True, description="Private key for the client certificate")
