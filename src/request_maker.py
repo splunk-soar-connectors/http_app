@@ -23,6 +23,8 @@ from . import helpers
 from .asset import Asset
 from .auth import OAuth
 from .common import logger
+from .auth import Authorization, CertificateAuth
+from .helpers import temp_cert_files
 
 
 def make_request(
@@ -49,20 +51,37 @@ def make_request(
 
     logger.info(f"Making {method} request to: {full_url}")
 
-    body = (
-        UnicodeDammit(body).unicode_markup.encode("utf-8")
-        if isinstance(body, str)
-        else body
-    )
+    body = UnicodeDammit(body).unicode_markup.encode("utf-8") if isinstance(body, str) else body
 
+    from .app import get_auth_method
+
+    auth_method = get_auth_method(asset, soar)
+
+    if isinstance(auth_method, CertificateAuth):
+        return _execute_certificate_request(auth_method, full_url, method, body, verify, parsed_headers, output, asset, soar)
+    else:
+        return _execute_standard_request(auth_method, full_url, method, body, verify, parsed_headers, output, asset, soar)
+
+
+def _execute_standard_request(
+    auth_method: Authorization,
+    full_url: str,
+    method: str,
+    body: Optional[str],
+    verify: bool,
+    headers: dict,
+    output_cls: type[ActionOutput],
+    asset: Asset,
+) -> ActionOutput:
+    """
+    Executes a standard HTTP request (non-certificate based).
+    Handles OAuth token refresh logic.
+    """
     retries = 1
     response = None
 
     while retries >= 0:
-        from .app import get_auth_method
-
-        auth_method = get_auth_method(asset, soar)
-        auth_object, final_headers = auth_method.create_auth(parsed_headers)
+        auth_object, final_headers = auth_method.create_auth(headers.copy())
 
         try:
             response = requests.request(
@@ -75,26 +94,68 @@ def make_request(
                 timeout=asset.timeout,
             )
             response.raise_for_status()
-
             break
 
         except requests.exceptions.RequestException as e:
             if isinstance(auth_method, OAuth) and retries > 0:
-                logger.warning(
-                    "Request failed with 401, token might be expired. Forcing a refresh."
-                )
-                auth_method.get_token(force_new=True)
+                logger.warning("Request failed with 401, token might be expired. Forcing a refresh.")
+                auth_method.get_token(force_new=True, full_url=full_url)
                 retries -= 1
                 continue
             else:
-                raise ActionFailure(
-                    f"Request failed for {full_url}. Details: {e}"
-                ) from e
+                raise ActionFailure(f"Request failed for {full_url}. Details: {e}") from e
+
+    if response is None:
+        raise ActionFailure(f"Request failed for {full_url} and no response was received after retries.")
 
     parsed_body, raw_body = helpers.handle_various_response(response)
     logger.info(f"Successfully processed data. Status: {response.status_code}")
 
-    return output(
+    return output_cls(
+        status_code=response.status_code,
+        location=full_url,
+        method=method,
+        parsed_response_body=parsed_body,
+        response_body=raw_body,
+        response_headers=str(dict(response.headers)),
+    )
+
+
+def _execute_certificate_request(
+    auth_method: CertificateAuth,
+    full_url: str,
+    method: str,
+    body: Optional[str],
+    verify: bool,
+    headers: dict,
+    output_cls: type[ActionOutput],
+    asset: Asset,
+) -> ActionOutput:
+    """
+    Executes an HTTP request using client-side certificates.
+    """
+    public_cert_data, private_key_data = auth_method.create_auth(headers.copy())
+
+    with temp_cert_files(public_cert_data, private_key_data) as cert_param:
+        try:
+            response = requests.request(
+                method=method,
+                url=full_url,
+                cert=cert_param,
+                data=body,
+                verify=verify,
+                headers=headers,
+                timeout=asset.timeout,
+            )
+            response.raise_for_status()
+
+        except requests.exceptions.RequestException as e:
+            raise ActionFailure(f"Certificate-based request failed for {full_url}. Details: {e}") from e
+
+    parsed_body, raw_body = helpers.handle_various_response(response)
+    logger.info(f"Successfully processed data. Status: {response.status_code}")
+
+    return output_cls(
         status_code=response.status_code,
         location=full_url,
         method=method,

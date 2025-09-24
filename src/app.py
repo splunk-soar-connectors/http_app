@@ -28,7 +28,7 @@ from .actions import (
 from .asset import Asset
 from .common import logger
 from .schemas import EmptyOutput
-from .auth import BasicAuth, TokenAuth, OAuth, NoAuth
+from .auth import BasicAuth, TokenAuth, OAuth, NoAuth, CertificateAuth
 from .request_maker import make_request
 
 app = App(
@@ -72,12 +72,8 @@ app.register_action(action_patch.patch_data, action_type="generic", read_only=Fa
 app.register_action(action_delete.delete_data, action_type="generic", read_only=False)
 app.register_action(action_head.get_headers, action_type="investigate")
 app.register_action(action_options.get_options, action_type="investigate")
-app.register_action(
-    put_file.put_file, action_type="generic", read_only=False, verbose=put_file.VERBOSE
-)
-app.register_action(
-    get_file.get_file, action_type="investigate", verbose=get_file.VERBOSE
-)
+app.register_action(put_file.put_file, action_type="generic", read_only=False, verbose=put_file.VERBOSE)
+app.register_action(get_file.get_file, action_type="investigate", verbose=get_file.VERBOSE)
 
 
 def get_auth_method(asset: Asset, soar_client: SOARClient):
@@ -88,7 +84,9 @@ def get_auth_method(asset: Asset, soar_client: SOARClient):
     authentication method to use (Basic, Token, OAuth, or None) and returns
     an instance of the corresponding strategy class.
     """
-    if asset.username and asset.password:
+    if asset.public_cert and asset.private_key:
+        return CertificateAuth(asset)
+    elif asset.username and asset.password:
         return BasicAuth(asset)
     elif asset.auth_token_name and asset.auth_token:
         return TokenAuth(asset)
