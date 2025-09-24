@@ -58,9 +58,9 @@ def make_request(
     auth_method = get_auth_method(asset, soar)
 
     if isinstance(auth_method, CertificateAuth):
-        return _execute_certificate_request(auth_method, full_url, method, body, verify, parsed_headers, output, asset, soar)
+        return _execute_certificate_request(auth_method, full_url, method, body, verify, parsed_headers, output, asset)
     else:
-        return _execute_standard_request(auth_method, full_url, method, body, verify, parsed_headers, output, asset, soar)
+        return _execute_standard_request(auth_method, full_url, method, body, verify, parsed_headers, output, asset)
 
 
 def _execute_standard_request(
