@@ -108,17 +108,7 @@ def _execute_standard_request(
     if response is None:
         raise ActionFailure(f"Request failed for {full_url} and no response was received after retries.")
 
-    parsed_body, raw_body = helpers.handle_various_response(response)
-    logger.info(f"Successfully processed data. Status: {response.status_code}")
-
-    return output_cls(
-        status_code=response.status_code,
-        location=full_url,
-        method=method,
-        parsed_response_body=parsed_body,
-        response_body=raw_body,
-        response_headers=str(dict(response.headers)),
-    )
+    return response_maker(response, full_url, method, output_cls)
 
 
 def _execute_certificate_request(
@@ -152,6 +142,10 @@ def _execute_certificate_request(
         except requests.exceptions.RequestException as e:
             raise ActionFailure(f"Certificate-based request failed for {full_url}. Details: {e}") from e
 
+    return response_maker(response, full_url, method, output_cls)
+
+
+def response_maker(response, full_url, method, output_cls):
     parsed_body, raw_body = helpers.handle_various_response(response)
     logger.info(f"Successfully processed data. Status: {response.status_code}")
 
