@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from pydantic import Extra
-from soar_sdk.action_results import ActionOutput, GenericActionOutput, OutputField
+from soar_sdk.action_results import ActionOutput, OutputField
 from soar_sdk.params import Param, Params
 
 
@@ -29,7 +29,7 @@ class ParsedResponseBody(ActionOutput):
         extra = Extra.allow
 
 
-class BaseHttpOutput(GenericActionOutput):
+class BaseHttpOutput(ActionOutput):
     """Base class for all standard action outputs."""
 
     location: str = OutputField(

@@ -97,10 +97,9 @@ action_result.message | string | | |
 action_result.parameter.location | string | `endpoint` | |
 action_result.parameter.verify_certificate | boolean | | |
 action_result.parameter.headers | string | | |
-action_result.data.\*.status_code | numeric | | 200 404 500 |
-action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
 action_result.data.\*.method | string | | POST |
+action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.response_headers | string | | |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
@@ -131,10 +130,9 @@ action_result.parameter.location | string | `endpoint` | |
 action_result.parameter.verify_certificate | boolean | | |
 action_result.parameter.headers | string | | |
 action_result.parameter.body | string | | |
-action_result.data.\*.status_code | numeric | | 200 404 500 |
-action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
 action_result.data.\*.method | string | | POST |
+action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.response_headers | string | | |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
@@ -165,10 +163,9 @@ action_result.parameter.location | string | `endpoint` | |
 action_result.parameter.verify_certificate | boolean | | |
 action_result.parameter.headers | string | | |
 action_result.parameter.body | string | | |
-action_result.data.\*.status_code | numeric | | 200 404 500 |
-action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
 action_result.data.\*.method | string | | POST |
+action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.response_headers | string | | |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
@@ -199,10 +196,9 @@ action_result.parameter.location | string | `endpoint` | |
 action_result.parameter.verify_certificate | boolean | | |
 action_result.parameter.headers | string | | |
 action_result.parameter.body | string | | |
-action_result.data.\*.status_code | numeric | | 200 404 500 |
-action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
 action_result.data.\*.method | string | | POST |
+action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.response_headers | string | | |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
@@ -233,10 +229,9 @@ action_result.parameter.location | string | `endpoint` | |
 action_result.parameter.verify_certificate | boolean | | |
 action_result.parameter.headers | string | | |
 action_result.parameter.body | string | | |
-action_result.data.\*.status_code | numeric | | 200 404 500 |
-action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
 action_result.data.\*.method | string | | POST |
+action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.response_headers | string | | |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
@@ -265,10 +260,9 @@ action_result.message | string | | |
 action_result.parameter.location | string | `endpoint` | |
 action_result.parameter.verify_certificate | boolean | | |
 action_result.parameter.headers | string | | |
-action_result.data.\*.status_code | numeric | | 200 404 500 |
-action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
 action_result.data.\*.method | string | | POST |
+action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.response_headers | string | | |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
@@ -297,10 +291,9 @@ action_result.message | string | | |
 action_result.parameter.location | string | `endpoint` | |
 action_result.parameter.verify_certificate | boolean | | |
 action_result.parameter.headers | string | | |
-action_result.data.\*.status_code | numeric | | 200 404 500 |
-action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/assets |
 action_result.data.\*.method | string | | POST |
+action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.response_headers | string | | |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
