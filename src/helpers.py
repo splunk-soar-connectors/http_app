@@ -22,6 +22,10 @@ from soar_sdk.exceptions import ActionFailure
 from .common import logger
 from .schemas import ParsedResponseBody
 
+import tempfile
+import os
+from contextlib import contextmanager
+
 
 def process_xml_response(response) -> dict:
     try:
@@ -34,13 +38,9 @@ def process_json_response(response) -> dict:
     try:
         return ParsedResponseBody(**response.json())
     except json.JSONDecodeError as e:
-        raise ActionFailure(
-            f"Server claimed JSON but failed to parse. Error: {e}"
-        ) from e
+        raise ActionFailure(f"Server claimed JSON but failed to parse. Error: {e}") from e
     except ValidationError as e:
-        raise ActionFailure(
-            f"Response JSON did not match expected structure. Details: {e}"
-        ) from e
+        raise ActionFailure(f"Response JSON did not match expected structure. Details: {e}") from e
 
 
 def process_html_response(response) -> ParsedResponseBody:
@@ -58,11 +58,7 @@ def process_html_response(response) -> ParsedResponseBody:
 
 
 def process_empty_response(content_type) -> dict:
-    message = (
-        "Response includes a file"
-        if "octet-stream" in content_type
-        else "Empty response body"
-    )
+    message = "Response includes a file" if "octet-stream" in content_type else "Empty response body"
     return {"message": message}
 
 
@@ -92,16 +88,12 @@ def parse_headers(headers_str: Optional[str]) -> dict:
         parsed_headers = json.loads(headers_str)
 
     except json.JSONDecodeError as e:
-        error_message = (
-            f"Failed to parse headers. Ensure it's a valid JSON object. Error: {e}"
-        )
+        error_message = f"Failed to parse headers. Ensure it's a valid JSON object. Error: {e}"
         logger.error(error_message)
         raise ActionFailure(error_message) from e
 
     if not isinstance(parsed_headers, dict):
-        raise ActionFailure(
-            "Headers parameter must be a valid JSON object (dictionary)."
-        )
+        raise ActionFailure("Headers parameter must be a valid JSON object (dictionary).")
 
     return parsed_headers
 
@@ -128,3 +120,30 @@ def handle_various_response(response):
     else:
         raw_body = response.text
     return parsed_body, raw_body
+
+
+@contextmanager
+def temp_cert_files(public_cert_data: str, private_key_data: str):
+    """
+    Context manager to create temporary files for public certificate and private key.
+    """
+    public_cert_path = None
+    private_key_path = None
+    try:
+        if public_cert_data:
+            with tempfile.NamedTemporaryFile(delete=False) as f_pub:
+                f_pub.write(public_cert_data.encode("utf-8"))
+                public_cert_path = f_pub.name
+
+        if private_key_data:
+            with tempfile.NamedTemporaryFile(delete=False) as f_priv:
+                f_priv.write(private_key_data.encode("utf-8"))
+                private_key_path = f_priv.name
+
+        yield (public_cert_path, private_key_path)
+
+    finally:
+        if public_cert_path and os.path.exists(public_cert_path):
+            os.remove(public_cert_path)
+        if private_key_path and os.path.exists(private_key_path):
+            os.remove(private_key_path)

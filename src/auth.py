@@ -116,13 +116,9 @@ class OAuth(Authorization):
             access_token = json.loads(response.text).get("access_token")
 
         except requests.exceptions.RequestException as e:
-            raise ActionFailure(
-                f"Error fetching OAuth token from {token_url}. Details: {e}"
-            ) from e
+            raise ActionFailure(f"Error fetching OAuth token from {token_url}. Details: {e}") from e
         except json.JSONDecodeError as e:
-            raise ActionFailure(
-                "Error parsing response from server while fetching token"
-            ) from e
+            raise ActionFailure("Error parsing response from server while fetching token") from e
 
         if not access_token:
             raise ActionFailure("Access token not found in response body")
@@ -156,6 +152,20 @@ class OAuth(Authorization):
         headers["Authorization"] = f"Bearer {access_token}"
 
         return None, headers
+
+
+class CertificateAuth(Authorization):
+    """
+    Implements authentication using client-side certificates.
+    """
+
+    def __init__(self, asset):
+        self.public_cert = asset.public_cert
+        self.private_key = asset.private_key
+
+    def create_auth(self, headers: dict) -> tuple[tuple[str, str], dict]:
+        logger.info("Using Certificate-based authentication")
+        return (self.public_cert, self.private_key), headers
 
 
 class NoAuth(Authorization):
