@@ -101,6 +101,8 @@ action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/asset
 action_result.data.\*.method | string | | POST |
 action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.response_headers | string | | |
+action_result.summary.status_code | numeric | | 200 |
+action_result.summary.reason | string | | Request successful |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 
@@ -134,6 +136,8 @@ action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/asset
 action_result.data.\*.method | string | | POST |
 action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.response_headers | string | | |
+action_result.summary.status_code | numeric | | 200 |
+action_result.summary.reason | string | | Request successful |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 
@@ -167,6 +171,8 @@ action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/asset
 action_result.data.\*.method | string | | POST |
 action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.response_headers | string | | |
+action_result.summary.status_code | numeric | | 200 |
+action_result.summary.reason | string | | Request successful |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 
@@ -200,6 +206,8 @@ action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/asset
 action_result.data.\*.method | string | | POST |
 action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.response_headers | string | | |
+action_result.summary.status_code | numeric | | 200 |
+action_result.summary.reason | string | | Request successful |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 
@@ -233,6 +241,8 @@ action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/asset
 action_result.data.\*.method | string | | POST |
 action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.response_headers | string | | |
+action_result.summary.status_code | numeric | | 200 |
+action_result.summary.reason | string | | Request successful |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 
@@ -264,6 +274,8 @@ action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/asset
 action_result.data.\*.method | string | | POST |
 action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.response_headers | string | | |
+action_result.summary.status_code | numeric | | 200 |
+action_result.summary.reason | string | | Request successful |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 
@@ -295,6 +307,8 @@ action_result.data.\*.location | string | `url` | http://192.168.1.26/rest/asset
 action_result.data.\*.method | string | | POST |
 action_result.data.\*.response_body | string | | {"failed": true, "message": "Requested item not found"} |
 action_result.data.\*.response_headers | string | | |
+action_result.summary.status_code | numeric | | 200 |
+action_result.summary.reason | string | | Request successful |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 
@@ -329,6 +343,7 @@ action_result.parameter.file_destination | string | `file path` | |
 action_result.parameter.file_name | string | | |
 action_result.parameter.verify_certificate | boolean | | |
 action_result.data.\*.file_sent | string | | |
+action_result.summary.file_sent | string | | http://192.168.1.26/web_storage/test_repo/test.txt |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 
@@ -360,6 +375,10 @@ action_result.parameter.file_path | string | `file path` | |
 action_result.parameter.verify_certificate | boolean | | |
 action_result.data.\*.vault_id | string | | |
 action_result.data.\*.file_name | string | | |
+action_result.summary.vault_id | string | | 1234567890 |
+action_result.summary.name | string | | test.txt |
+action_result.summary.exit_status | numeric | | |
+action_result.summary.size | numeric | | 100 |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
 

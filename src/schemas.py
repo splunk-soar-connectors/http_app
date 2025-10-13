@@ -14,6 +14,7 @@
 from pydantic import Extra
 from soar_sdk.action_results import ActionOutput, OutputField
 from soar_sdk.params import Param, Params
+from typing import Optional
 
 
 class EmptyOutput(ActionOutput):
@@ -65,3 +66,36 @@ class BaseHttpParams(Params):
     headers: str = Param(
         description="Additional headers (JSON object with headers)", required=False
     )
+
+
+class HttpSummary(ActionOutput):
+    """Summary for HTTP actions."""
+
+    status_code: int = OutputField(example_values=[200])
+    reason: str = OutputField(example_values=["Request successful"])
+
+    def get_message(self) -> str:
+        return f"Status code: {self.status_code}, Reason: {self.reason}"
+
+
+class PutFileSummary(ActionOutput):
+    """Summary for Put File action."""
+
+    file_sent: str = OutputField(
+        example_values=["http://192.168.1.26/web_storage/test_repo/test.txt"]
+    )
+
+    def get_message(self) -> str:
+        return f"File sent: {self.file_sent}"
+
+
+class GetFileSummary(ActionOutput):
+    """Summary for Get File action."""
+
+    vault_id: str = OutputField(example_values=["1234567890"])
+    name: str = OutputField(example_values=["test.txt"])
+    exit_status: int = 0
+    size: Optional[int] = OutputField(example_values=[100])
+
+    def get_message(self) -> str:
+        return f"Vault ID: {self.vault_id}, Name: {self.name}, Exit Status: {self.exit_status}"

@@ -19,7 +19,7 @@ from soar_sdk.abstract import SOARClient
 from soar_sdk.action_results import ActionOutput
 from soar_sdk.exceptions import ActionFailure
 from soar_sdk.params import Param, Params
-
+from ..schemas import PutFileSummary
 from ..asset import Asset
 from ..common import logger
 
@@ -101,9 +101,8 @@ def put_file(params: PutFileParams, soar: SOARClient, asset: Asset) -> PutFileOu
             files_payload = {"file": f}
             query_params = {"file_path": params.file_destination}
             logger.info(f"Uploading file '{file_name_to_send}' to: {full_url}")
-            response = requests.request(
-                method="POST",
-                url=full_url,
+            response = requests.post(
+                full_url,
                 auth=auth_object,
                 headers=final_headers,
                 params=query_params,
@@ -117,6 +116,9 @@ def put_file(params: PutFileParams, soar: SOARClient, asset: Asset) -> PutFileOu
     except Exception as e:
         raise ActionFailure(f"An unexpected error occurred. Details: {e}") from e
     logger.info(f"File successfully uploaded. Server status: {response.status_code}")
+    put_summary = PutFileSummary(file_sent=full_url)
+    soar.set_summary(put_summary)
+    soar.set_message(put_summary.get_message())
     return PutFileOutput(
         file_sent=full_url,
     )

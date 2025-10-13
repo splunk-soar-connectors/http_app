@@ -22,6 +22,7 @@ from soar_sdk.params import Param, Params
 
 from ..asset import Asset
 from ..common import logger
+from ..schemas import GetFileSummary
 
 VERBOSE = "Provide the file path and file name to download into the vault. For example, <b>/web_storage/file.tgz</b>."
 
@@ -74,9 +75,8 @@ def get_file(params: GetFileParams, soar: SOARClient, asset: Asset) -> GetFileOu
     auth_object, final_headers = auth_strategy.create_auth({})
 
     try:
-        response = requests.request(
-            method="GET",
-            url=full_url,
+        response = requests.get(
+            full_url,
             auth=auth_object,
             headers=final_headers,
             verify=params.verify_certificate,
@@ -111,4 +111,7 @@ def get_file(params: GetFileParams, soar: SOARClient, asset: Asset) -> GetFileOu
         ) from e
 
     logger.info("File successfully retrieved and added to vault")
+    get_summary = GetFileSummary(vault_id=new_vault_id, name=file_name)
+    soar.set_summary(get_summary)
+    soar.set_message(get_summary.get_message())
     return GetFileOutput(vault_id=new_vault_id, file_name=file_name)

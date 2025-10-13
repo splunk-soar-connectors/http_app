@@ -27,7 +27,7 @@ from .actions import (
 )
 from .asset import Asset
 from .common import logger
-from .schemas import EmptyOutput
+from .schemas import EmptyOutput, HttpSummary, PutFileSummary, GetFileSummary
 from .auth import BasicAuth, TokenAuth, OAuth, NoAuth
 from .request_maker import make_request
 
@@ -65,18 +65,51 @@ def test_connectivity(soar: SOARClient, asset: Asset) -> None:
     logger.info("Test connectivity passed!")
 
 
-app.register_action(action_get.get_data, action_type="investigate")
-app.register_action(action_post.post_data, action_type="generic", read_only=False)
-app.register_action(action_put.put_data, action_type="generic", read_only=False)
-app.register_action(action_patch.patch_data, action_type="generic", read_only=False)
-app.register_action(action_delete.delete_data, action_type="generic", read_only=False)
-app.register_action(action_head.get_headers, action_type="investigate")
-app.register_action(action_options.get_options, action_type="investigate")
 app.register_action(
-    put_file.put_file, action_type="generic", read_only=False, verbose=put_file.VERBOSE
+    action_get.get_data, action_type="investigate", summary_type=HttpSummary
 )
 app.register_action(
-    get_file.get_file, action_type="investigate", verbose=get_file.VERBOSE
+    action_post.post_data,
+    action_type="generic",
+    read_only=False,
+    summary_type=HttpSummary,
+)
+app.register_action(
+    action_put.put_data,
+    action_type="generic",
+    read_only=False,
+    summary_type=HttpSummary,
+)
+app.register_action(
+    action_patch.patch_data,
+    action_type="generic",
+    read_only=False,
+    summary_type=HttpSummary,
+)
+app.register_action(
+    action_delete.delete_data,
+    action_type="generic",
+    read_only=False,
+    summary_type=HttpSummary,
+)
+app.register_action(
+    action_head.get_headers, action_type="investigate", summary_type=HttpSummary
+)
+app.register_action(
+    action_options.get_options, action_type="investigate", summary_type=HttpSummary
+)
+app.register_action(
+    put_file.put_file,
+    action_type="generic",
+    read_only=False,
+    verbose=put_file.VERBOSE,
+    summary_type=PutFileSummary,
+)
+app.register_action(
+    get_file.get_file,
+    action_type="investigate",
+    verbose=get_file.VERBOSE,
+    summary_type=GetFileSummary,
 )
 
 

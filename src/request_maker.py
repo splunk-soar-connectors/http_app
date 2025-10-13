@@ -23,6 +23,7 @@ from . import helpers
 from .asset import Asset
 from .auth import OAuth
 from .common import logger
+from .schemas import HttpSummary
 
 
 def make_request(
@@ -93,6 +94,11 @@ def make_request(
 
     parsed_body, raw_body = helpers.handle_various_response(response)
     logger.info(f"Successfully processed data. Status: {response.status_code}")
+    summary = HttpSummary(
+        status_code=response.status_code,
+        reason="Request successful" if response.status_code < 300 else response.reason,
+    )
+    soar.set_summary(summary)
 
     return output(
         status_code=response.status_code,
