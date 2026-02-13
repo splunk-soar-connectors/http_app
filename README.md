@@ -34,6 +34,10 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **oauth_token_url** | optional | string | URL to fetch oauth token from |
 **client_id** | optional | string | Client ID (for OAuth) |
 **client_secret** | optional | password | Client Secret (for OAuth) |
+**oauth_grant_type** | optional | string | OAuth grant_type value for token request body |
+**oauth_scope** | optional | string | OAuth scope value for token request body |
+**oauth_resource** | optional | string | OAuth resource value for token request body (legacy Azure AD) |
+**oauth_extra_body** | optional | string | Additional OAuth token request body fields as a JSON object |
 **timeout** | optional | numeric | Timeout for HTTP calls |
 **test_http_method** | optional | string | HTTP Method for Test Connectivity |
 

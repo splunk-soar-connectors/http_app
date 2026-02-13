@@ -78,14 +78,35 @@
             "order": 9,
             "description": "Client Secret (for OAuth)"
         },
+        "oauth_grant_type": {
+            "data_type": "string",
+            "order": 10,
+            "description": "OAuth grant_type value for token request body",
+            "default": "client_credentials"
+        },
+        "oauth_scope": {
+            "data_type": "string",
+            "order": 11,
+            "description": "OAuth scope value for token request body"
+        },
+        "oauth_resource": {
+            "data_type": "string",
+            "order": 12,
+            "description": "OAuth resource value for token request body (legacy Azure AD)"
+        },
+        "oauth_extra_body": {
+            "data_type": "string",
+            "order": 13,
+            "description": "Additional OAuth token request body fields as a JSON object"
+        },
         "timeout": {
             "data_type": "numeric",
-            "order": 10,
+            "order": 14,
             "description": "Timeout for HTTP calls"
         },
         "test_http_method": {
             "data_type": "string",
-            "order": 11,
+            "order": 15,
             "description": "HTTP Method for Test Connectivity",
             "default": "GET",
             "value_list": [

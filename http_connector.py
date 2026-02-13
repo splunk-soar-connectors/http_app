@@ -67,6 +67,10 @@ class HttpConnector(BaseConnector):
         self._oauth_token_url = None
         self._client_id = None
         self._client_secret = None
+        self._oauth_grant_type = None
+        self._oauth_scope = None
+        self._oauth_resource = None
+        self._oauth_extra_body = {}
         self._access_token = None
         self.access_token_retry = True
 
@@ -160,6 +164,28 @@ class HttpConnector(BaseConnector):
             self._oauth_token_url = self._oauth_token_url.strip("/")
         self._client_id = config.get("client_id")
         self._client_secret = config.get("client_secret")
+        self._oauth_grant_type = config.get("oauth_grant_type", "client_credentials")
+        if isinstance(self._oauth_grant_type, str):
+            self._oauth_grant_type = self._oauth_grant_type.strip()
+        if not self._oauth_grant_type:
+            self._oauth_grant_type = "client_credentials"
+
+        self._oauth_scope = config.get("oauth_scope")
+        if isinstance(self._oauth_scope, str):
+            self._oauth_scope = self._oauth_scope.strip()
+        if not self._oauth_scope:
+            self._oauth_scope = None
+
+        self._oauth_resource = config.get("oauth_resource")
+        if isinstance(self._oauth_resource, str):
+            self._oauth_resource = self._oauth_resource.strip()
+        if not self._oauth_resource:
+            self._oauth_resource = None
+
+        ret_val, self._oauth_extra_body = self._get_oauth_extra_body(config.get("oauth_extra_body"))
+        if phantom.is_fail(ret_val):
+            return self.get_status()
+
         self._access_token = self._state.get(HTTP_JSON_ACCESS_TOKEN)
 
         if "test_path" in config:
@@ -488,6 +514,67 @@ class HttpConnector(BaseConnector):
 
         return RetVal(phantom.APP_SUCCESS, headers)
 
+    def _get_oauth_extra_body(self, oauth_extra_body):
+        if oauth_extra_body is None:
+            return RetVal(phantom.APP_SUCCESS, {})
+
+        if hasattr(oauth_extra_body, "decode"):
+            oauth_extra_body = oauth_extra_body.decode("utf-8")
+
+        if not isinstance(oauth_extra_body, str):
+            return RetVal(
+                self.set_status(phantom.APP_ERROR, "'oauth_extra_body' must be a JSON object string"),
+                {},
+            )
+
+        oauth_extra_body = oauth_extra_body.strip()
+        if not oauth_extra_body:
+            return RetVal(phantom.APP_SUCCESS, {})
+
+        try:
+            oauth_extra_body = json.loads(oauth_extra_body)
+        except Exception as e:
+            error_message = self._get_error_message_from_exception(e)
+            return RetVal(
+                self.set_status(
+                    phantom.APP_ERROR,
+                    f"Failed to parse 'oauth_extra_body' as JSON object. Details: {error_message}",
+                ),
+                {},
+            )
+
+        if not isinstance(oauth_extra_body, dict):
+            return RetVal(
+                self.set_status(phantom.APP_ERROR, "'oauth_extra_body' must be a JSON object"),
+                {},
+            )
+
+        return RetVal(phantom.APP_SUCCESS, oauth_extra_body)
+
+    def _use_oauth_body_client_credentials(self):
+        has_custom_oauth_inputs = bool(self._oauth_scope or self._oauth_resource or self._oauth_extra_body)
+        return has_custom_oauth_inputs or self._oauth_grant_type != "client_credentials"
+
+    def _build_oauth_payload(self):
+        payload = {}
+
+        # Keep typed OAuth fields authoritative over generic extras.
+        payload.update(self._oauth_extra_body)
+        payload["grant_type"] = self._oauth_grant_type
+
+        if self._oauth_scope:
+            payload["scope"] = self._oauth_scope
+        if self._oauth_resource:
+            payload["resource"] = self._oauth_resource
+
+        if self._use_oauth_body_client_credentials():
+            if self._client_id:
+                payload["client_id"] = self._client_id
+            if self._client_secret:
+                payload["client_secret"] = self._client_secret
+
+        return payload
+
     def _generate_api_token(self, action_result, new_token=False):
         """This function is used to generate token
 
@@ -501,13 +588,14 @@ class HttpConnector(BaseConnector):
             self.save_progress("Using old token")
             return self._access_token
 
-        payload = {"grant_type": "client_credentials"}
+        payload = self._build_oauth_payload()
+        use_oauth_body_client_credentials = self._use_oauth_body_client_credentials()
 
         self.save_progress("Fetching new token")
         # Querying endpoint to generate token
         response = requests.post(
             self._oauth_token_url,
-            auth=HTTPBasicAuth(self._client_id, self._client_secret),  # nosemgrep
+            auth=None if use_oauth_body_client_credentials else HTTPBasicAuth(self._client_id, self._client_secret),  # nosemgrep
             data=payload,
             timeout=DEFAULT_REQUEST_TIMEOUT,
         )
