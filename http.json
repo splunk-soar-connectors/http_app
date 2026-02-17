@@ -97,7 +97,7 @@
         "oauth_extra_body": {
             "data_type": "string",
             "order": 13,
-            "description": "Additional OAuth token request body fields as a JSON object"
+            "description": "Additional OAuth token request body fields as a JSON object string"
         },
         "timeout": {
             "data_type": "numeric",
