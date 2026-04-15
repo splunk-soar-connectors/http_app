@@ -58,34 +58,44 @@
             "order": 5,
             "description": "Password (for HTTP basic auth)"
         },
+        "oauth_password": {
+            "data_type": "password",
+            "order": 6,
+            "description": "Optional: Password for OAuth password grants"
+        },
+        "oauth_username": {
+            "data_type": "string",
+            "order": 7,
+            "description": "Optional: Username for OAuth password grants"
+        },
         "oauth_token_url": {
             "data_type": "string",
-            "order": 6,
+            "order": 8,
             "description": "URL to fetch oauth token from"
         },
         "placeholder": {
             "data_type": "ph",
-            "order": 7,
+            "order": 9,
             "description": ""
         },
         "client_id": {
             "data_type": "string",
-            "order": 8,
+            "order": 10,
             "description": "Client ID (for OAuth)"
         },
         "client_secret": {
             "data_type": "password",
-            "order": 9,
+            "order": 11,
             "description": "Client Secret (for OAuth)"
         },
         "timeout": {
             "data_type": "numeric",
-            "order": 10,
+            "order": 12,
             "description": "Timeout for HTTP calls"
         },
         "test_http_method": {
             "data_type": "string",
-            "order": 11,
+            "order": 13,
             "description": "HTTP Method for Test Connectivity",
             "default": "GET",
             "value_list": [

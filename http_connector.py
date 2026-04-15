@@ -64,6 +64,9 @@ class HttpConnector(BaseConnector):
         self._token = None
         self._username = None
         self._password = None
+        self._oauth_username = None
+        self._oauth_password = None
+        self._oauth_password_grant = False
         self._oauth_token_url = None
         self._client_id = None
         self._client_secret = None
@@ -154,6 +157,12 @@ class HttpConnector(BaseConnector):
         self._username = config.get("username")
         self._password = config.get("password", "")
         self._test_http_method = config.get("test_http_method", "get").lower()
+
+        # if oauth password AND oauth username have been set we use the oauth password granttype 
+        self._oauth_password = config.get("oauth_password")
+        self._oauth_username = config.get("oauth_username")
+        if self._oauth_password and self._oauth_username:
+            self._oauth_password_grant = True
 
         self._oauth_token_url = config.get("oauth_token_url")
         if self._oauth_token_url:
@@ -501,7 +510,14 @@ class HttpConnector(BaseConnector):
             self.save_progress("Using old token")
             return self._access_token
 
-        payload = {"grant_type": "client_credentials"}
+        if self._oauth_password_grant:
+            payload = {
+                    "grant_type": "password",
+                    "username": self._oauth_username,
+                    "password": self._oauth_password,
+                    }
+        else:
+            payload = {"grant_type": "client_credentials"}
 
         self.save_progress("Fetching new token")
         # Querying endpoint to generate token
