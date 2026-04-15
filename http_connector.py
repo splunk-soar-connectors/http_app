@@ -167,6 +167,7 @@ class HttpConnector(BaseConnector):
         self._oauth_token_url = config.get("oauth_token_url")
         if self._oauth_token_url:
             self._oauth_token_url = self._oauth_token_url.strip("/")
+
         self._client_id = config.get("client_id")
         self._client_secret = config.get("client_secret")
         self._access_token = self._state.get(HTTP_JSON_ACCESS_TOKEN)
@@ -510,14 +511,20 @@ class HttpConnector(BaseConnector):
             self.save_progress("Using old token")
             return self._access_token
 
+        payload = None
         if self._oauth_password_grant:
             payload = {
                     "grant_type": "password",
                     "username": self._oauth_username,
                     "password": self._oauth_password,
                     }
-        else:
+
+        if self._oauth_token_url:
             payload = {"grant_type": "client_credentials"}
+
+        if not payload:
+            action_result.set_status(phantom.APP_ERROR, f"Improperly configured Oauth credentials") 
+            return None
 
         self.save_progress("Fetching new token")
         # Querying endpoint to generate token
