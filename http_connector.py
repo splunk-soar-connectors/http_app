@@ -523,8 +523,6 @@ class HttpConnector(BaseConnector):
             self.save_progress("Using client credentials")
             payload = {"grant_type": "client_credentials"}
 
-            return None
-
         self.save_progress("Fetching new token")
         # Querying endpoint to generate token
         response = requests.post(
