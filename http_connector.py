@@ -513,17 +513,16 @@ class HttpConnector(BaseConnector):
 
         payload = None
         if self._oauth_password_grant:
+            self.save_progress("Using password grant")
             payload = {
                     "grant_type": "password",
                     "username": self._oauth_username,
                     "password": self._oauth_password,
                     }
-
-        if self._oauth_token_url:
+        else:
+            self.save_progress("Using client credentials")
             payload = {"grant_type": "client_credentials"}
 
-        if not payload:
-            action_result.set_status(phantom.APP_ERROR, f"Improperly configured Oauth credentials") 
             return None
 
         self.save_progress("Fetching new token")

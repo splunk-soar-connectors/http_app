@@ -58,15 +58,15 @@
             "order": 5,
             "description": "Password (for HTTP basic auth)"
         },
-        "oauth_password": {
-            "data_type": "password",
-            "order": 6,
-            "description": "Optional: Password for OAuth password grants"
-        },
         "oauth_username": {
             "data_type": "string",
+            "order": 6,
+            "description": "Username (for OAuth password grants)"
+        },
+        "oauth_password": {
+            "data_type": "password",
             "order": 7,
-            "description": "Optional: Username for OAuth password grants"
+            "description": "Password (for OAuth password grants)"
         },
         "oauth_token_url": {
             "data_type": "string",

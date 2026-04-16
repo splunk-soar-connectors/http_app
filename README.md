@@ -16,9 +16,9 @@ HTTPS) on your Phantom host(s) in order to function.
 **Authentication is carried out in following priority order**
 
 1. Basic Auth (username and password)
-1. OAuth (oauth token url, client id and client secret)
-1. OAuth Password grants
-1. Provided Auth token (auth_token_name, auth_token)
+2. OAuth Password grants (username, password, oauth token url, client id and client secret)
+3. OAuth (oauth token url, client id and client secret)
+4. Provided Auth token (auth_token_name, auth_token)
 
 ### Configuration variables
 
