@@ -32,11 +32,15 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **auth_token** | optional | password | Value of authentication token |
 **username** | optional | string | Username (for HTTP basic auth) |
 **password** | optional | password | Password (for HTTP basic auth) |
+**oauth_username** | optional | string | Username (for Oauth password grants) |
+**oauth_password** | optional | password | Password (for Oauth password grants) |
 **oauth_token_url** | optional | string | URL to fetch oauth token from |
 **client_id** | optional | string | Client ID (for OAuth) |
 **client_secret** | optional | password | Client Secret (for OAuth) |
 **timeout** | optional | numeric | Timeout for HTTP calls |
 **test_http_method** | optional | string | HTTP Method for Test Connectivity |
+
+Basic auth is configured using `username`/`password` fields. For Oauth password grants both the `oauth_username` and `oauth_password` fields must be configured.
 
 ### Supported Actions
 
