@@ -16,7 +16,6 @@ HTTPS) on your Phantom host(s) in order to function.
 **Authentication is carried out in following priority order**
 
 1. Basic Auth (username and password)
-2. OAuth Password grants (username, password, oauth token url, client id and client secret)
 3. OAuth (oauth token url, client id and client secret)
 4. Provided Auth token (auth_token_name, auth_token)
 
@@ -39,8 +38,6 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **client_secret** | optional | password | Client Secret (for OAuth) |
 **timeout** | optional | numeric | Timeout for HTTP calls |
 **test_http_method** | optional | string | HTTP Method for Test Connectivity |
-
-Basic auth is configured using `username`/`password` fields. For Oauth password grants both the `oauth_username` and `oauth_password` fields must be configured.
 
 ### Supported Actions
 
