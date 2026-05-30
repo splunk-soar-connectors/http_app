@@ -64,6 +64,9 @@ class HttpConnector(BaseConnector):
         self._token = None
         self._username = None
         self._password = None
+        self._oauth_username = None
+        self._oauth_password = None
+        self._oauth_password_grant = False
         self._oauth_token_url = None
         self._client_id = None
         self._client_secret = None
@@ -155,9 +158,23 @@ class HttpConnector(BaseConnector):
         self._password = config.get("password", "")
         self._test_http_method = config.get("test_http_method", "get").lower()
 
+        # if oauth password AND oauth username have been set we use the oauth password granttype 
+        self._oauth_password = config.get("oauth_password")
+        self._oauth_username = config.get("oauth_username")
+
+        # make sure both are set together
+        if bool(self._oauth_password) != bool(self._oauth_username):
+            return self.set_status(
+                phantom.APP_ERROR,
+                "Both oauth_username and oauth_password must be provided together"
+            )
+
+        self._oauth_password_grant = bool(self._oauth_username and self._oauth_password)
+
         self._oauth_token_url = config.get("oauth_token_url")
         if self._oauth_token_url:
             self._oauth_token_url = self._oauth_token_url.strip("/")
+
         self._client_id = config.get("client_id")
         self._client_secret = config.get("client_secret")
         self._access_token = self._state.get(HTTP_JSON_ACCESS_TOKEN)
@@ -409,7 +426,7 @@ class HttpConnector(BaseConnector):
         if access_token and r.status_code == 401 and self.access_token_retry:
             self.save_progress(f"Got error: {r.status_code}")
             self._access_token = None
-            self._state.pop("access_token")
+            self._state.pop(HTTP_JSON_ACCESS_TOKEN, None)
             self.access_token_retry = False  # make it to false to avoid getting access token after one time (prevents recursive loop)
             return self._make_http_call(
                 action_result,
@@ -501,20 +518,39 @@ class HttpConnector(BaseConnector):
             self.save_progress("Using old token")
             return self._access_token
 
-        payload = {"grant_type": "client_credentials"}
+        if self._oauth_password_grant:
+            self.save_progress("Using password grant")
+            payload = {
+                    "grant_type": "password",
+                    "username": self._oauth_username,
+                    "password": self._oauth_password,
+                    }
+        else:
+            self.save_progress("Using client credentials")
+            payload = {"grant_type": "client_credentials"}
 
         self.save_progress("Fetching new token")
+
         # Querying endpoint to generate token
-        response = requests.post(
-            self._oauth_token_url,
-            auth=HTTPBasicAuth(self._client_id, self._client_secret),  # nosemgrep
-            data=payload,
-            timeout=DEFAULT_REQUEST_TIMEOUT,
-        )
+        try:
+            response = requests.post(
+                self._oauth_token_url,
+                auth=HTTPBasicAuth(self._client_id, self._client_secret),  # nosemgrep
+                data=payload,
+                timeout=DEFAULT_REQUEST_TIMEOUT,
+            )
+        except Exception as e:
+            error_message = self._get_error_message_from_exception(e)
+            action_result.set_status(
+                phantom.APP_ERROR,
+                f"Error connecting to token endpoint {self._oauth_token_url}. Details: {error_message}",
+            )
+            return None
+
         if response.status_code not in [200, 201]:
             action_result.set_status(
                 phantom.APP_ERROR,
-                f"Error fetching token from {self._oauth_token_url}. Server returned {response.status_code}",
+                f"Error fetching token from {self._oauth_token_url}. Server returned {response.status_code} with body {response.text}",
             )
             return None
 
