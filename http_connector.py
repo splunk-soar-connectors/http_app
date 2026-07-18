@@ -20,6 +20,7 @@ import re
 import shutil
 import socket
 import sys
+import tempfile
 import uuid
 from urllib.parse import quote, unquote_plus, urlparse
 
@@ -615,8 +616,9 @@ class HttpConnector(BaseConnector):
 
         if not validators.url(validate_endpoint):
             return action_result.set_status(phantom.APP_ERROR, HTTP_INVALID_URL_ERR)
-        file_name = file_path.split("/")[-1]
-        file_name = unquote_plus(file_name)
+        file_name = os.path.basename(unquote_plus(file_path))
+        if file_name in {"", ".", ".."}:
+            return action_result.set_status(phantom.APP_ERROR, HTTP_INVALID_PATH_ERR)
         try:
             ret_val, r = self._make_http_call(
                 action_result,
@@ -761,10 +763,10 @@ class HttpConnector(BaseConnector):
                 f"Unable to create temporary folder {temp_dir}.",
                 e,
             )
-        file_path = f"{local_dir}/{file_name}"
-        # open and download the file
-        with open(file_path, "wb") as f:
+        # Keep caller-controlled display names out of the local filesystem path.
+        with tempfile.NamedTemporaryFile(dir=local_dir, delete=False) as f:
             f.write(response.content)
+            file_path = f.name
         contains = []
         file_ext = ""
         magic_str = magic.from_file(file_path)
