@@ -46,6 +46,7 @@ class RetVal(tuple):
 
 
 class HttpConnector(BaseConnector):
+    MAX_XML_RESPONSE_BYTES = 5 * 1024 * 1024
     SENSITIVE_RESPONSE_HEADERS = {"authorization", "cookie", "proxy-authenticate", "set-cookie", "set-cookie2"}
     MAGIC_FORMATS = [
         (re.compile("^PE.* Windows"), ["pe file"], ".exe"),
@@ -306,6 +307,10 @@ class HttpConnector(BaseConnector):
 
     def _process_xml_response(self, r, action_result):
         resp_json = None
+        if b"<!doctype" in r.content.lower():
+            return RetVal(
+                action_result.set_status(phantom.APP_ERROR, "XML responses containing a document type declaration are not allowed"), None
+            )
         try:
             if r.text:
                 resp_json = xmltodict.parse(r.text)
@@ -352,6 +357,30 @@ class HttpConnector(BaseConnector):
         )
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), r.text)
+
+    def _buffer_xml_response(self, response, action_result):
+        if "xml" not in response.headers.get("Content-Type", "").casefold():
+            return phantom.APP_SUCCESS
+
+        content_length = response.headers.get("Content-Length")
+        if content_length:
+            try:
+                if int(content_length) > self.MAX_XML_RESPONSE_BYTES:
+                    response.close()
+                    return action_result.set_status(phantom.APP_ERROR, "XML response exceeds the 5 MiB processing limit")
+            except ValueError:
+                pass
+
+        content = bytearray()
+        for chunk in response.iter_content(chunk_size=64 * 1024):
+            content.extend(chunk)
+            if len(content) > self.MAX_XML_RESPONSE_BYTES:
+                response.close()
+                return action_result.set_status(phantom.APP_ERROR, "XML response exceeds the 5 MiB processing limit")
+
+        response._content = bytes(content)
+        response._content_consumed = True
+        return phantom.APP_SUCCESS
 
     @classmethod
     def _safe_response_headers(cls, headers):
@@ -409,6 +438,7 @@ class HttpConnector(BaseConnector):
                 headers=headers,
                 files=files,
                 timeout=self._timeout,
+                stream=True,
             )
 
         except Exception as e:
@@ -417,6 +447,9 @@ class HttpConnector(BaseConnector):
                 phantom.APP_ERROR,
                 f"Error Connecting to server. Details: {error_message}",
             ), None
+
+        if phantom.is_fail(self._buffer_xml_response(r, action_result)):
+            return action_result.get_status(), r
 
         # fetch new token if old one has expired
         if access_token and r.status_code == 401 and self.access_token_retry:
@@ -742,6 +775,8 @@ class HttpConnector(BaseConnector):
         finally:
             f.close()
 
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
         if response.status_code == 200:
             summary = {"file_sent": destination_path}
             action_result.update_summary(summary)

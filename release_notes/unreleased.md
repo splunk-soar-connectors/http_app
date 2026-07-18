@@ -6,3 +6,4 @@
 * Stored downloaded content in a generated temporary file so encoded path separators cannot escape the vault staging directory.
 * Enabled TLS certificate verification by default for asset and action requests. Existing assets retain their saved setting and should be reviewed after upgrade.
 * Removed session- and credential-bearing headers from persisted HTTP action results.
+* Rejected XML document type declarations and XML responses larger than 5 MiB before parsing.
