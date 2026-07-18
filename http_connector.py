@@ -46,6 +46,7 @@ class RetVal(tuple):
 
 
 class HttpConnector(BaseConnector):
+    SENSITIVE_RESPONSE_HEADERS = {"authorization", "cookie", "proxy-authenticate", "set-cookie", "set-cookie2"}
     MAGIC_FORMATS = [
         (re.compile("^PE.* Windows"), ["pe file"], ".exe"),
         (re.compile("^MS-DOS executable"), ["pe file"], ".exe"),
@@ -352,6 +353,10 @@ class HttpConnector(BaseConnector):
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), r.text)
 
+    @classmethod
+    def _safe_response_headers(cls, headers):
+        return {name: value for name, value in headers.items() if name.casefold() not in cls.SENSITIVE_RESPONSE_HEADERS}
+
     def _make_http_call(
         self,
         action_result,
@@ -435,7 +440,7 @@ class HttpConnector(BaseConnector):
         if self.get_action_identifier() == "http_head" and r.status_code == 200:
             resp_data = {"method": method.upper(), "location": url}
             try:
-                resp_data["response_headers"] = dict(r.headers)
+                resp_data["response_headers"] = self._safe_response_headers(r.headers)
             except Exception:
                 pass
             action_result.add_data(resp_data)
@@ -461,7 +466,7 @@ class HttpConnector(BaseConnector):
             "response_body": response_body,
         }
         try:
-            resp_data["response_headers"] = dict(r.headers)
+            resp_data["response_headers"] = self._safe_response_headers(r.headers)
         except Exception:
             pass
         action_result.add_data(resp_data)
