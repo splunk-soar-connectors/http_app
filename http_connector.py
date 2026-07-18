@@ -66,6 +66,7 @@ class HttpConnector(BaseConnector):
         self._token = None
         self._username = None
         self._password = None
+        self._verify = True
         self._oauth_token_url = None
         self._client_id = None
         self._client_secret = None
@@ -186,6 +187,7 @@ class HttpConnector(BaseConnector):
         self._client_id = config.get("client_id")
         self._client_secret = config.get("client_secret")
         self._access_token = self._state.get(HTTP_JSON_ACCESS_TOKEN)
+        self._verify = config.get("verify_server_cert", True)
 
         if "test_path" in config:
             try:
@@ -357,7 +359,7 @@ class HttpConnector(BaseConnector):
         method="get",
         headers=None,
         params=None,
-        verify=False,
+        verify=None,
         data=None,
         files=None,
         use_default_endpoint=False,
@@ -365,6 +367,7 @@ class HttpConnector(BaseConnector):
         auth = None
         headers = {} if not headers else headers
         access_token = ""
+        verify = self._verify if verify is None else verify
         file_action = self.get_action_identifier() in {"get_file", "put_file"}
         use_asset_credentials = not (file_action and not use_default_endpoint)
 
@@ -582,7 +585,7 @@ class HttpConnector(BaseConnector):
             endpoint=location,
             method=method,
             headers=headers,
-            verify=param.get("verify_certificate", False),
+            verify=param.get("verify_certificate", self._verify),
             data=body,
         )
         return ret_val
@@ -624,7 +627,7 @@ class HttpConnector(BaseConnector):
                 action_result,
                 endpoint=endpoint,
                 method=method,
-                verify=param.get("verify_certificate", False),
+                verify=param.get("verify_certificate", self._verify),
                 use_default_endpoint=use_default_endpoint,
             )
         except Exception as e:
@@ -724,7 +727,7 @@ class HttpConnector(BaseConnector):
                 endpoint=destination_path,
                 method=method,
                 params=params,
-                verify=param.get("verify_certificate", False),
+                verify=param.get("verify_certificate", self._verify),
                 files=files,
                 use_default_endpoint=use_default_endpoint,
             )
