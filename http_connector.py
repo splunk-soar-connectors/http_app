@@ -362,26 +362,28 @@ class HttpConnector(BaseConnector):
         auth = None
         headers = {} if not headers else headers
         access_token = ""
-        if self._username:
-            self.save_progress("Using HTTP Basic auth to authenticate")
-            auth = (self._username, self._password)
-        elif self._oauth_token_url and self._client_id:
-            self.save_progress("Using OAuth to authenticate")
-            access_token = self._generate_api_token(action_result)
-            if not access_token:
-                return action_result.get_status(), None
-            headers["Authorization"] = f"Bearer {access_token}"
-        elif self._token_name:
-            self.save_progress("Using provided token to authenticate")
-            if self._token and self._token_name not in headers:
-                headers[self._token_name] = self._token
-        else:
-            return action_result.set_status(phantom.APP_ERROR, "No authentication method set"), None
+        file_action = self.get_action_identifier() in {"get_file", "put_file"}
+        use_asset_credentials = not (file_action and not use_default_endpoint)
 
-        if self.get_action_identifier() == "get_file" or self.get_action_identifier() == "put_file":
+        if use_asset_credentials:
+            if self._username:
+                self.save_progress("Using HTTP Basic auth to authenticate")
+                auth = (self._username, self._password)
+            elif self._oauth_token_url and self._client_id:
+                self.save_progress("Using OAuth to authenticate")
+                access_token = self._generate_api_token(action_result)
+                if not access_token:
+                    return action_result.get_status(), None
+                headers["Authorization"] = f"Bearer {access_token}"
+            elif self._token_name:
+                self.save_progress("Using provided token to authenticate")
+                if self._token and self._token_name not in headers:
+                    headers[self._token_name] = self._token
+            else:
+                return action_result.set_status(phantom.APP_ERROR, "No authentication method set"), None
+
+        if file_action:
             url = endpoint
-            if not use_default_endpoint:
-                auth = None
         else:
             url = self._base_url + endpoint
 
