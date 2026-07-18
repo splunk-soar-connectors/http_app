@@ -13,6 +13,7 @@
 # either express or implied. See the License for the specific language governing permissions
 # and limitations under the License.
 
+import ipaddress
 import json
 import os
 import re
@@ -77,6 +78,29 @@ class HttpConnector(BaseConnector):
         """
         self.debug_print(HTTP_ENCRYPT_TOKEN.format(token_name))  # nosemgrep
         return encryption_helper.encrypt(encrypt_var, self.get_asset_id())
+
+    @staticmethod
+    def _get_url_address_error(url):
+        parsed = urlparse(url)
+        if not parsed.scheme or not parsed.hostname:
+            return f'Failed to parse URL ({url}). Should look like "http(s)://location/optional_path"'
+
+        try:
+            addresses = socket.getaddrinfo(parsed.hostname, parsed.port, type=socket.SOCK_STREAM)
+        except OSError as e:
+            return f"Unable to resolve URL host {parsed.hostname}: {e}"
+
+        for address_info in addresses:
+            address = ipaddress.ip_address(address_info[4][0].split("%", 1)[0])
+            mapped_address = getattr(address, "ipv4_mapped", None)
+            if (
+                address.is_loopback
+                or address.is_unspecified
+                or (mapped_address and (mapped_address.is_loopback or mapped_address.is_unspecified))
+            ):
+                return "Accessing loopback or unspecified addresses is not allowed"
+
+        return None
 
     def decrypt_state(self, decrypt_var, token_name):
         """Handle decryption of token.
@@ -180,31 +204,9 @@ class HttpConnector(BaseConnector):
             if self._timeout is None:
                 return self.get_status()
 
-        parsed = urlparse(self._base_url)
-
-        if not parsed.scheme or not parsed.hostname:
-            return self.set_status(
-                phantom.APP_ERROR,
-                f'Failed to parse URL ({self._base_url}). Should look like "http(s)://location/optional_path"',
-            )
-
-        # Make sure base_url isn't 127.0.0.1
-        addr = parsed.hostname
-        try:
-            unpacked = socket.gethostbyname(addr)
-        except Exception as ex:
-            self.error_print("Exception occurred.", ex)
-            try:
-                packed = socket.inet_aton(addr)
-                unpacked = socket.inet_aton(packed)
-            except Exception as ex:
-                self.error_print("Exception occurred.", ex)
-                # gethostbyname can fail even when the addr is a hostname
-                # If that happens, I think we can assume that it isn't localhost
-                unpacked = ""
-
-        if unpacked.startswith("127."):
-            return self.set_status(phantom.APP_ERROR, "Accessing 127.0.0.1 is not allowed")
+        address_error = self._get_url_address_error(self._base_url)
+        if address_error:
+            return self.set_status(phantom.APP_ERROR, address_error)
 
         if self._state.get(HTTP_STATE_IS_ENCRYPTED):
             try:
@@ -600,6 +602,10 @@ class HttpConnector(BaseConnector):
         hostname = hostname.strip(" ")
         hostname = hostname.strip("/")
 
+        address_error = self._get_url_address_error(hostname)
+        if address_error:
+            return action_result.set_status(phantom.APP_ERROR, address_error)
+
         if file_path == "":
             return action_result.set_status(phantom.APP_ERROR, HTTP_INVALID_PATH_ERR)
 
@@ -689,6 +695,10 @@ class HttpConnector(BaseConnector):
 
         file_dest = file_dest.strip("/")
         endpoint = endpoint.rstrip("/")
+
+        address_error = self._get_url_address_error(endpoint)
+        if address_error:
+            return action_result.set_status(phantom.APP_ERROR, address_error)
 
         # encoding input file name
         dest_file_name = dest_file_name.strip("/")
