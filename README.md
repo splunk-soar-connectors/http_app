@@ -36,6 +36,7 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 **client_secret** | optional | password | Client Secret (for OAuth) |
 **timeout** | optional | numeric | Timeout for HTTP calls |
 **test_http_method** | optional | string | HTTP Method for Test Connectivity |
+**verify_server_cert** | optional | boolean | Verify the HTTP server certificate by default |
 
 ### Supported Actions
 
@@ -384,7 +385,7 @@ ______________________________________________________________________
 
 Auto-generated Splunk SOAR Connector documentation.
 
-Copyright 2025 Splunk Inc.
+Copyright 2026 Splunk Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

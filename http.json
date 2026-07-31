@@ -17,7 +17,7 @@
     "product_name": "HTTP",
     "product_version_regex": ".*",
     "min_phantom_version": "6.2.1",
-    "license": "Copyright (c) 2016-2025 Splunk Inc.",
+    "license": "Copyright (c) 2016-2026 Splunk Inc.",
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
     "python_version": "3.9, 3.13",
@@ -98,6 +98,12 @@
                 "TRACE",
                 "PATCH"
             ]
+        },
+        "verify_server_cert": {
+            "data_type": "boolean",
+            "order": 12,
+            "description": "Verify the HTTP server certificate by default",
+            "default": true
         }
     },
     "actions": [
@@ -138,6 +144,7 @@
                 "verify_certificate": {
                     "description": "Verify certificates (if using HTTPS)",
                     "data_type": "boolean",
+                    "default": true,
                     "order": 2
                 },
                 "headers": {
@@ -288,6 +295,7 @@
                 "verify_certificate": {
                     "description": "Verify certificates (if using HTTPS)",
                     "data_type": "boolean",
+                    "default": true,
                     "order": 2
                 },
                 "headers": {
@@ -438,6 +446,7 @@
                 "verify_certificate": {
                     "description": "Verify certificates (if using HTTPS)",
                     "data_type": "boolean",
+                    "default": true,
                     "order": 2
                 },
                 "headers": {
@@ -583,6 +592,7 @@
                 "verify_certificate": {
                     "description": "Verify certificates (if using HTTPS)",
                     "data_type": "boolean",
+                    "default": true,
                     "order": 1
                 },
                 "headers": {
@@ -707,6 +717,7 @@
                 "verify_certificate": {
                     "description": "Verify certificates (if using HTTPS)",
                     "data_type": "boolean",
+                    "default": true,
                     "order": 1
                 },
                 "headers": {
@@ -842,6 +853,7 @@
                 "verify_certificate": {
                     "description": "Verify certificates (if using HTTPS)",
                     "data_type": "boolean",
+                    "default": true,
                     "order": 1
                 },
                 "headers": {
@@ -988,6 +1000,7 @@
                 "verify_certificate": {
                     "description": "Verify certificates (if using HTTPS)",
                     "data_type": "boolean",
+                    "default": true,
                     "order": 2
                 },
                 "headers": {
@@ -1146,6 +1159,7 @@
                 "verify_certificate": {
                     "description": "Verify certificates (if using HTTPS)",
                     "data_type": "boolean",
+                    "default": true,
                     "order": 2
                 }
             },
@@ -1300,6 +1314,7 @@
                 "verify_certificate": {
                     "description": "Verify certificates (if using HTTPS)",
                     "data_type": "boolean",
+                    "default": true,
                     "order": 4
                 }
             },

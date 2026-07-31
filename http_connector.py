@@ -1,6 +1,6 @@
 # File: http_connector.py
 #
-# Copyright (c) 2016-2025 Splunk Inc.
+# Copyright (c) 2016-2026 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,12 +13,14 @@
 # either express or implied. See the License for the specific language governing permissions
 # and limitations under the License.
 
+import ipaddress
 import json
 import os
 import re
 import shutil
 import socket
 import sys
+import tempfile
 import uuid
 from urllib.parse import quote, unquote_plus, urlparse
 
@@ -44,6 +46,8 @@ class RetVal(tuple):
 
 
 class HttpConnector(BaseConnector):
+    MAX_XML_RESPONSE_BYTES = 5 * 1024 * 1024
+    SENSITIVE_RESPONSE_HEADERS = {"authorization", "cookie", "proxy-authenticate", "set-cookie", "set-cookie2"}
     MAGIC_FORMATS = [
         (re.compile("^PE.* Windows"), ["pe file"], ".exe"),
         (re.compile("^MS-DOS executable"), ["pe file"], ".exe"),
@@ -64,6 +68,7 @@ class HttpConnector(BaseConnector):
         self._token = None
         self._username = None
         self._password = None
+        self._verify = True
         self._oauth_token_url = None
         self._client_id = None
         self._client_secret = None
@@ -77,6 +82,29 @@ class HttpConnector(BaseConnector):
         """
         self.debug_print(HTTP_ENCRYPT_TOKEN.format(token_name))  # nosemgrep
         return encryption_helper.encrypt(encrypt_var, self.get_asset_id())
+
+    @staticmethod
+    def _get_url_address_error(url):
+        parsed = urlparse(url)
+        if not parsed.scheme or not parsed.hostname:
+            return f'Failed to parse URL ({url}). Should look like "http(s)://location/optional_path"'
+
+        try:
+            addresses = socket.getaddrinfo(parsed.hostname, parsed.port, type=socket.SOCK_STREAM)
+        except OSError as e:
+            return f"Unable to resolve URL host {parsed.hostname}: {e}"
+
+        for address_info in addresses:
+            address = ipaddress.ip_address(address_info[4][0].split("%", 1)[0])
+            mapped_address = getattr(address, "ipv4_mapped", None)
+            if (
+                address.is_loopback
+                or address.is_unspecified
+                or (mapped_address and (mapped_address.is_loopback or mapped_address.is_unspecified))
+            ):
+                return "Accessing loopback or unspecified addresses is not allowed"
+
+        return None
 
     def decrypt_state(self, decrypt_var, token_name):
         """Handle decryption of token.
@@ -161,6 +189,7 @@ class HttpConnector(BaseConnector):
         self._client_id = config.get("client_id")
         self._client_secret = config.get("client_secret")
         self._access_token = self._state.get(HTTP_JSON_ACCESS_TOKEN)
+        self._verify = config.get("verify_server_cert", True)
 
         if "test_path" in config:
             try:
@@ -180,31 +209,9 @@ class HttpConnector(BaseConnector):
             if self._timeout is None:
                 return self.get_status()
 
-        parsed = urlparse(self._base_url)
-
-        if not parsed.scheme or not parsed.hostname:
-            return self.set_status(
-                phantom.APP_ERROR,
-                f'Failed to parse URL ({self._base_url}). Should look like "http(s)://location/optional_path"',
-            )
-
-        # Make sure base_url isn't 127.0.0.1
-        addr = parsed.hostname
-        try:
-            unpacked = socket.gethostbyname(addr)
-        except Exception as ex:
-            self.error_print("Exception occurred.", ex)
-            try:
-                packed = socket.inet_aton(addr)
-                unpacked = socket.inet_aton(packed)
-            except Exception as ex:
-                self.error_print("Exception occurred.", ex)
-                # gethostbyname can fail even when the addr is a hostname
-                # If that happens, I think we can assume that it isn't localhost
-                unpacked = ""
-
-        if unpacked.startswith("127."):
-            return self.set_status(phantom.APP_ERROR, "Accessing 127.0.0.1 is not allowed")
+        address_error = self._get_url_address_error(self._base_url)
+        if address_error:
+            return self.set_status(phantom.APP_ERROR, address_error)
 
         if self._state.get(HTTP_STATE_IS_ENCRYPTED):
             try:
@@ -300,6 +307,10 @@ class HttpConnector(BaseConnector):
 
     def _process_xml_response(self, r, action_result):
         resp_json = None
+        if b"<!doctype" in r.content.lower():
+            return RetVal(
+                action_result.set_status(phantom.APP_ERROR, "XML responses containing a document type declaration are not allowed"), None
+            )
         try:
             if r.text:
                 resp_json = xmltodict.parse(r.text)
@@ -347,6 +358,34 @@ class HttpConnector(BaseConnector):
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), r.text)
 
+    def _buffer_xml_response(self, response, action_result):
+        if "xml" not in response.headers.get("Content-Type", "").casefold():
+            return phantom.APP_SUCCESS
+
+        content_length = response.headers.get("Content-Length")
+        if content_length:
+            try:
+                if int(content_length) > self.MAX_XML_RESPONSE_BYTES:
+                    response.close()
+                    return action_result.set_status(phantom.APP_ERROR, "XML response exceeds the 5 MiB processing limit")
+            except ValueError:
+                pass
+
+        content = bytearray()
+        for chunk in response.iter_content(chunk_size=64 * 1024):
+            content.extend(chunk)
+            if len(content) > self.MAX_XML_RESPONSE_BYTES:
+                response.close()
+                return action_result.set_status(phantom.APP_ERROR, "XML response exceeds the 5 MiB processing limit")
+
+        response._content = bytes(content)
+        response._content_consumed = True
+        return phantom.APP_SUCCESS
+
+    @classmethod
+    def _safe_response_headers(cls, headers):
+        return {name: value for name, value in headers.items() if name.casefold() not in cls.SENSITIVE_RESPONSE_HEADERS}
+
     def _make_http_call(
         self,
         action_result,
@@ -354,7 +393,7 @@ class HttpConnector(BaseConnector):
         method="get",
         headers=None,
         params=None,
-        verify=False,
+        verify=None,
         data=None,
         files=None,
         use_default_endpoint=False,
@@ -362,26 +401,29 @@ class HttpConnector(BaseConnector):
         auth = None
         headers = {} if not headers else headers
         access_token = ""
-        if self._username:
-            self.save_progress("Using HTTP Basic auth to authenticate")
-            auth = (self._username, self._password)
-        elif self._oauth_token_url and self._client_id:
-            self.save_progress("Using OAuth to authenticate")
-            access_token = self._generate_api_token(action_result)
-            if not access_token:
-                return action_result.get_status(), None
-            headers["Authorization"] = f"Bearer {access_token}"
-        elif self._token_name:
-            self.save_progress("Using provided token to authenticate")
-            if self._token and self._token_name not in headers:
-                headers[self._token_name] = self._token
-        else:
-            return action_result.set_status(phantom.APP_ERROR, "No authentication method set"), None
+        verify = self._verify if verify is None else verify
+        file_action = self.get_action_identifier() in {"get_file", "put_file"}
+        use_asset_credentials = not (file_action and not use_default_endpoint)
 
-        if self.get_action_identifier() == "get_file" or self.get_action_identifier() == "put_file":
+        if use_asset_credentials:
+            if self._username:
+                self.save_progress("Using HTTP Basic auth to authenticate")
+                auth = (self._username, self._password)
+            elif self._oauth_token_url and self._client_id:
+                self.save_progress("Using OAuth to authenticate")
+                access_token = self._generate_api_token(action_result)
+                if not access_token:
+                    return action_result.get_status(), None
+                headers["Authorization"] = f"Bearer {access_token}"
+            elif self._token_name:
+                self.save_progress("Using provided token to authenticate")
+                if self._token and self._token_name not in headers:
+                    headers[self._token_name] = self._token
+            else:
+                return action_result.set_status(phantom.APP_ERROR, "No authentication method set"), None
+
+        if file_action:
             url = endpoint
-            if not use_default_endpoint:
-                auth = None
         else:
             url = self._base_url + endpoint
 
@@ -396,6 +438,7 @@ class HttpConnector(BaseConnector):
                 headers=headers,
                 files=files,
                 timeout=self._timeout,
+                stream=True,
             )
 
         except Exception as e:
@@ -404,6 +447,9 @@ class HttpConnector(BaseConnector):
                 phantom.APP_ERROR,
                 f"Error Connecting to server. Details: {error_message}",
             ), None
+
+        if phantom.is_fail(self._buffer_xml_response(r, action_result)):
+            return action_result.get_status(), r
 
         # fetch new token if old one has expired
         if access_token and r.status_code == 401 and self.access_token_retry:
@@ -427,7 +473,7 @@ class HttpConnector(BaseConnector):
         if self.get_action_identifier() == "http_head" and r.status_code == 200:
             resp_data = {"method": method.upper(), "location": url}
             try:
-                resp_data["response_headers"] = dict(r.headers)
+                resp_data["response_headers"] = self._safe_response_headers(r.headers)
             except Exception:
                 pass
             action_result.add_data(resp_data)
@@ -453,7 +499,7 @@ class HttpConnector(BaseConnector):
             "response_body": response_body,
         }
         try:
-            resp_data["response_headers"] = dict(r.headers)
+            resp_data["response_headers"] = self._safe_response_headers(r.headers)
         except Exception:
             pass
         action_result.add_data(resp_data)
@@ -577,7 +623,7 @@ class HttpConnector(BaseConnector):
             endpoint=location,
             method=method,
             headers=headers,
-            verify=param.get("verify_certificate", False),
+            verify=param.get("verify_certificate", self._verify),
             data=body,
         )
         return ret_val
@@ -598,6 +644,10 @@ class HttpConnector(BaseConnector):
         hostname = hostname.strip(" ")
         hostname = hostname.strip("/")
 
+        address_error = self._get_url_address_error(hostname)
+        if address_error:
+            return action_result.set_status(phantom.APP_ERROR, address_error)
+
         if file_path == "":
             return action_result.set_status(phantom.APP_ERROR, HTTP_INVALID_PATH_ERR)
 
@@ -607,14 +657,15 @@ class HttpConnector(BaseConnector):
 
         if not validators.url(validate_endpoint):
             return action_result.set_status(phantom.APP_ERROR, HTTP_INVALID_URL_ERR)
-        file_name = file_path.split("/")[-1]
-        file_name = unquote_plus(file_name)
+        file_name = os.path.basename(unquote_plus(file_path))
+        if file_name in {"", ".", ".."}:
+            return action_result.set_status(phantom.APP_ERROR, HTTP_INVALID_PATH_ERR)
         try:
             ret_val, r = self._make_http_call(
                 action_result,
                 endpoint=endpoint,
                 method=method,
-                verify=param.get("verify_certificate", False),
+                verify=param.get("verify_certificate", self._verify),
                 use_default_endpoint=use_default_endpoint,
             )
         except Exception as e:
@@ -688,6 +739,10 @@ class HttpConnector(BaseConnector):
         file_dest = file_dest.strip("/")
         endpoint = endpoint.rstrip("/")
 
+        address_error = self._get_url_address_error(endpoint)
+        if address_error:
+            return action_result.set_status(phantom.APP_ERROR, address_error)
+
         # encoding input file name
         dest_file_name = dest_file_name.strip("/")
         validate_dest_file_name = quote(dest_file_name)
@@ -710,7 +765,7 @@ class HttpConnector(BaseConnector):
                 endpoint=destination_path,
                 method=method,
                 params=params,
-                verify=param.get("verify_certificate", False),
+                verify=param.get("verify_certificate", self._verify),
                 files=files,
                 use_default_endpoint=use_default_endpoint,
             )
@@ -720,6 +775,8 @@ class HttpConnector(BaseConnector):
         finally:
             f.close()
 
+        if phantom.is_fail(ret_val):
+            return action_result.get_status()
         if response.status_code == 200:
             summary = {"file_sent": destination_path}
             action_result.update_summary(summary)
@@ -749,10 +806,10 @@ class HttpConnector(BaseConnector):
                 f"Unable to create temporary folder {temp_dir}.",
                 e,
             )
-        file_path = f"{local_dir}/{file_name}"
-        # open and download the file
-        with open(file_path, "wb") as f:
+        # Keep caller-controlled display names out of the local filesystem path.
+        with tempfile.NamedTemporaryFile(dir=local_dir, delete=False) as f:
             f.write(response.content)
+            file_path = f.name
         contains = []
         file_ext = ""
         magic_str = magic.from_file(file_path)
