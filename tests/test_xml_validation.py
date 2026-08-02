@@ -11,25 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pytest
+import unittest
 
 from http_xml_validation import reject_unsafe_xml_declarations
 
 
-def test_reject_unsafe_xml_declarations_accepts_plain_xml():
-    xml = "<?xml version='1.0'?><response><status>ok</status></response>"
-    assert reject_unsafe_xml_declarations(xml) == xml
+class RejectUnsafeXmlDeclarationsTest(unittest.TestCase):
+    def test_accepts_plain_xml(self):
+        xml = "<?xml version='1.0'?><response><status>ok</status></response>"
+        self.assertEqual(reject_unsafe_xml_declarations(xml), xml)
 
+    def test_rejects_after_charset_decoding(self):
+        xml = "<?xml version='1.0'?><!DOCTYPE r [<!ENTITY a 'value'>]><r attr='&a;'/>"
+        for encoding in ("utf-8", "utf-16", "utf-32"):
+            with self.subTest(encoding=encoding), self.assertRaises(ValueError):
+                reject_unsafe_xml_declarations(xml.encode(encoding).decode(encoding))
 
-@pytest.mark.parametrize("encoding", ["utf-8", "utf-16", "utf-32"])
-def test_reject_unsafe_xml_declarations_after_charset_decoding(encoding):
-    xml = "<?xml version='1.0'?><!DOCTYPE r [<!ENTITY a 'value'>]><r attr='&a;'/>"
-    decoded = xml.encode(encoding).decode(encoding)
-    with pytest.raises(ValueError):
-        reject_unsafe_xml_declarations(decoded)
-
-
-@pytest.mark.parametrize("declaration", ["<!doctype r>", "<!DoCtYpE r>", "<!ENTITY a 'value'>", "<! entity a 'value'>"])
-def test_reject_unsafe_xml_declarations_rejects_declaration_variants(declaration):
-    with pytest.raises(ValueError):
-        reject_unsafe_xml_declarations(f"{declaration}<r/>")
+    def test_rejects_declaration_variants(self):
+        declarations = ("<!doctype r>", "<!DoCtYpE r>", "<!ENTITY a 'value'>", "<! entity a 'value'>")
+        for declaration in declarations:
+            with self.subTest(declaration=declaration), self.assertRaises(ValueError):
+                reject_unsafe_xml_declarations(f"{declaration}<r/>")
