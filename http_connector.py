@@ -38,6 +38,7 @@ from phantom.vault import Vault as Vault
 from requests.auth import HTTPBasicAuth
 
 from http_consts import *
+from http_xml_validation import reject_unsafe_xml_declarations
 
 
 class RetVal(tuple):
@@ -307,13 +308,14 @@ class HttpConnector(BaseConnector):
 
     def _process_xml_response(self, r, action_result):
         resp_json = None
-        if b"<!doctype" in r.content.lower():
-            return RetVal(
-                action_result.set_status(phantom.APP_ERROR, "XML responses containing a document type declaration are not allowed"), None
-            )
+        response_text = r.text
         try:
-            if r.text:
-                resp_json = xmltodict.parse(r.text)
+            response_text = reject_unsafe_xml_declarations(response_text)
+        except ValueError as exc:
+            return RetVal(action_result.set_status(phantom.APP_ERROR, str(exc)), None)
+        try:
+            if response_text:
+                resp_json = xmltodict.parse(response_text)
         except Exception as e:
             error_message = self._get_error_message_from_exception(e)
             return RetVal(
@@ -326,7 +328,9 @@ class HttpConnector(BaseConnector):
         if 200 <= r.status_code < 400:
             return RetVal(phantom.APP_SUCCESS, resp_json)
 
-        message = "Error from server. Status Code: {} Data from server: {}".format(r.status_code, r.text.replace("{", "{{").replace("}", "}}"))
+        message = "Error from server. Status Code: {} Data from server: {}".format(
+            r.status_code, response_text.replace("{", "{{").replace("}", "}}")
+        )
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), resp_json)
 
