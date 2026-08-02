@@ -48,10 +48,30 @@ class RetVal(tuple):
 
 
 class _PinnedAddressAdapter(HTTPAdapter):
-    def __init__(self, hostname, address):
-        self._hostname = hostname
-        self._address = address
+    def __init__(self, address_resolver, preserve_host_header=False):
+        self._address_resolver = address_resolver
+        self._preserve_host_header = preserve_host_header
+        self._hostname = None
+        self._address = None
         super().__init__()
+
+    def send(self, request, **kwargs):
+        address_error, resolved_address = self._address_resolver(request.url)
+        if address_error:
+            raise requests.exceptions.InvalidURL(address_error)
+
+        parsed = urlparse(request.url)
+        self._hostname = parsed.hostname
+        self._address = resolved_address
+        if not self._preserve_host_header:
+            host_header = parsed.hostname
+            if ":" in host_header:
+                host_header = f"[{host_header}]"
+            if parsed.port:
+                host_header = f"{host_header}:{parsed.port}"
+            request.headers["Host"] = host_header
+
+        return super().send(request, **kwargs)
 
     def get_connection(self, url, proxies=None):
         parsed = urlparse(url)
@@ -472,21 +492,10 @@ class HttpConnector(BaseConnector):
         else:
             url = self._base_url + endpoint
 
-        address_error, resolved_address = self._resolve_safe_url_address(url)
-        if address_error:
-            return action_result.set_status(phantom.APP_ERROR, address_error), None
-
-        parsed_url = urlparse(url)
-        host_header = parsed_url.hostname
-        if ":" in host_header:
-            host_header = f"[{host_header}]"
-        if parsed_url.port:
-            host_header = f"{host_header}:{parsed_url.port}"
-        headers.setdefault("Host", host_header)
-
         session = requests.Session()
         session.trust_env = False
-        address_adapter = _PinnedAddressAdapter(parsed_url.hostname, resolved_address)
+        preserve_host_header = any(name.casefold() == "host" for name in headers)
+        address_adapter = _PinnedAddressAdapter(self._resolve_safe_url_address, preserve_host_header)
         session.mount("http://", address_adapter)
         session.mount("https://", address_adapter)
 
@@ -502,7 +511,6 @@ class HttpConnector(BaseConnector):
                 files=files,
                 timeout=self._timeout,
                 stream=True,
-                allow_redirects=False,
             )
 
         except Exception as e:
@@ -511,10 +519,6 @@ class HttpConnector(BaseConnector):
                 phantom.APP_ERROR,
                 f"Error Connecting to server. Details: {error_message}",
             ), None
-
-        if r.is_redirect or r.is_permanent_redirect:
-            r.close()
-            return action_result.set_status(phantom.APP_ERROR, "Redirect responses are not allowed"), r
 
         if phantom.is_fail(self._buffer_xml_response(r, action_result)):
             return action_result.get_status(), r
