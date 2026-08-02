@@ -55,21 +55,25 @@ class _PinnedAddressAdapter(HTTPAdapter):
 
     def get_connection(self, url, proxies=None):
         parsed = urlparse(url)
+        pool_kwargs = {}
+        if parsed.scheme == "https":
+            pool_kwargs = {
+                "assert_hostname": self._hostname,
+                "server_hostname": self._hostname,
+            }
         return self.poolmanager.connection_from_host(
             self._address,
             port=parsed.port,
             scheme=parsed.scheme,
-            pool_kwargs={
-                "assert_hostname": self._hostname,
-                "server_hostname": self._hostname,
-            },
+            pool_kwargs=pool_kwargs,
         )
 
     def get_connection_with_tls_context(self, request, verify, proxies=None, cert=None):
         host_params, pool_kwargs = self.build_connection_pool_key_attributes(request, verify, cert)
         host_params["host"] = self._address
-        pool_kwargs["assert_hostname"] = self._hostname
-        pool_kwargs["server_hostname"] = self._hostname
+        if host_params["scheme"] == "https":
+            pool_kwargs["assert_hostname"] = self._hostname
+            pool_kwargs["server_hostname"] = self._hostname
         return self.poolmanager.connection_from_host(**host_params, pool_kwargs=pool_kwargs)
 
 
