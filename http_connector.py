@@ -35,14 +35,66 @@ from bs4 import BeautifulSoup, UnicodeDammit
 from phantom.action_result import ActionResult
 from phantom.base_connector import BaseConnector
 from phantom.vault import Vault as Vault
+from requests.adapters import HTTPAdapter
 from requests.auth import HTTPBasicAuth
 
 from http_consts import *
+from http_xml_validation import reject_unsafe_xml_declarations
 
 
 class RetVal(tuple):
     def __new__(cls, val1, val2=None):
         return tuple.__new__(RetVal, (val1, val2))
+
+
+class _PinnedAddressAdapter(HTTPAdapter):
+    def __init__(self, address_resolver, preserve_host_header=False):
+        self._address_resolver = address_resolver
+        self._preserve_host_header = preserve_host_header
+        self._hostname = None
+        self._address = None
+        super().__init__()
+
+    def send(self, request, **kwargs):
+        address_error, resolved_address = self._address_resolver(request.url)
+        if address_error:
+            raise requests.exceptions.InvalidURL(address_error)
+
+        parsed = urlparse(request.url)
+        self._hostname = parsed.hostname
+        self._address = resolved_address
+        if not self._preserve_host_header:
+            host_header = parsed.hostname
+            if ":" in host_header:
+                host_header = f"[{host_header}]"
+            if parsed.port:
+                host_header = f"{host_header}:{parsed.port}"
+            request.headers["Host"] = host_header
+
+        return super().send(request, **kwargs)
+
+    def get_connection(self, url, proxies=None):
+        parsed = urlparse(url)
+        pool_kwargs = {}
+        if parsed.scheme == "https":
+            pool_kwargs = {
+                "assert_hostname": self._hostname,
+                "server_hostname": self._hostname,
+            }
+        return self.poolmanager.connection_from_host(
+            self._address,
+            port=parsed.port,
+            scheme=parsed.scheme,
+            pool_kwargs=pool_kwargs,
+        )
+
+    def get_connection_with_tls_context(self, request, verify, proxies=None, cert=None):
+        host_params, pool_kwargs = self.build_connection_pool_key_attributes(request, verify, cert)
+        host_params["host"] = self._address
+        if host_params["scheme"] == "https":
+            pool_kwargs["assert_hostname"] = self._hostname
+            pool_kwargs["server_hostname"] = self._hostname
+        return self.poolmanager.connection_from_host(**host_params, pool_kwargs=pool_kwargs)
 
 
 class HttpConnector(BaseConnector):
@@ -84,16 +136,17 @@ class HttpConnector(BaseConnector):
         return encryption_helper.encrypt(encrypt_var, self.get_asset_id())
 
     @staticmethod
-    def _get_url_address_error(url):
+    def _resolve_safe_url_address(url):
         parsed = urlparse(url)
-        if not parsed.scheme or not parsed.hostname:
-            return f'Failed to parse URL ({url}). Should look like "http(s)://location/optional_path"'
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password:
+            return f'Failed to parse URL ({url}). Should look like "http(s)://location/optional_path"', None
 
         try:
             addresses = socket.getaddrinfo(parsed.hostname, parsed.port, type=socket.SOCK_STREAM)
         except OSError as e:
-            return f"Unable to resolve URL host {parsed.hostname}: {e}"
+            return f"Unable to resolve URL host {parsed.hostname}: {e}", None
 
+        safe_addresses = []
         for address_info in addresses:
             address = ipaddress.ip_address(address_info[4][0].split("%", 1)[0])
             mapped_address = getattr(address, "ipv4_mapped", None)
@@ -102,9 +155,18 @@ class HttpConnector(BaseConnector):
                 or address.is_unspecified
                 or (mapped_address and (mapped_address.is_loopback or mapped_address.is_unspecified))
             ):
-                return "Accessing loopback or unspecified addresses is not allowed"
+                return "Accessing loopback or unspecified addresses is not allowed", None
+            safe_addresses.append(str(address))
 
-        return None
+        if not safe_addresses:
+            return f"Unable to resolve URL host {parsed.hostname}", None
+
+        return None, safe_addresses[0]
+
+    @classmethod
+    def _get_url_address_error(cls, url):
+        error, _ = cls._resolve_safe_url_address(url)
+        return error
 
     def decrypt_state(self, decrypt_var, token_name):
         """Handle decryption of token.
@@ -307,13 +369,14 @@ class HttpConnector(BaseConnector):
 
     def _process_xml_response(self, r, action_result):
         resp_json = None
-        if b"<!doctype" in r.content.lower():
-            return RetVal(
-                action_result.set_status(phantom.APP_ERROR, "XML responses containing a document type declaration are not allowed"), None
-            )
+        response_text = r.text
         try:
-            if r.text:
-                resp_json = xmltodict.parse(r.text)
+            response_text = reject_unsafe_xml_declarations(response_text)
+        except ValueError as exc:
+            return RetVal(action_result.set_status(phantom.APP_ERROR, str(exc)), None)
+        try:
+            if response_text:
+                resp_json = xmltodict.parse(response_text)
         except Exception as e:
             error_message = self._get_error_message_from_exception(e)
             return RetVal(
@@ -326,7 +389,9 @@ class HttpConnector(BaseConnector):
         if 200 <= r.status_code < 400:
             return RetVal(phantom.APP_SUCCESS, resp_json)
 
-        message = "Error from server. Status Code: {} Data from server: {}".format(r.status_code, r.text.replace("{", "{{").replace("}", "}}"))
+        message = "Error from server. Status Code: {} Data from server: {}".format(
+            r.status_code, response_text.replace("{", "{{").replace("}", "}}")
+        )
 
         return RetVal(action_result.set_status(phantom.APP_ERROR, message), resp_json)
 
@@ -427,8 +492,15 @@ class HttpConnector(BaseConnector):
         else:
             url = self._base_url + endpoint
 
+        session = requests.Session()
+        session.trust_env = False
+        preserve_host_header = any(name.casefold() == "host" for name in headers)
+        address_adapter = _PinnedAddressAdapter(self._resolve_safe_url_address, preserve_host_header)
+        session.mount("http://", address_adapter)
+        session.mount("https://", address_adapter)
+
         try:
-            r = requests.request(
+            r = session.request(
                 method=method,
                 url=url,
                 auth=auth,
