@@ -19,6 +19,15 @@ HTTPS) on your Phantom host(s) in order to function.
 1. OAuth (oauth token url, client id and client secret)
 1. Provided Auth token (auth_token_name, auth_token)
 
+### Sensitive response headers
+
+By default, HTTP actions omit `Authorization`, `Cookie`, `Proxy-Authenticate`, `Set-Cookie`, and `Set-Cookie2` from
+`response_headers`. Enable `expose_sensitive_response_headers` only for a specific action run that requires these values.
+
+When enabled, the unredacted values are persisted in the container's action results. A user with permission to view that
+container can retrieve them later, even if the user did not run the action. Treat these values as credentials or session
+material and enable the option only when the workflow requires it.
+
 ### Configuration variables
 
 This table lists the configuration variables required to operate HTTP. These variables are specified when configuring a HTTP asset in Splunk SOAR.
@@ -83,6 +92,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **body** | required | PATCH body (query string, JSON, etc.) | string | |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
+**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
 
 #### Action Output
 
@@ -119,6 +129,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **body** | optional | PATCH body (query string, JSON, etc.) | string | |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
+**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
 
 #### Action Output
 
@@ -155,6 +166,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **body** | optional | DELETE body (query string, JSON, etc.) | string | |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
+**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
 
 #### Action Output
 
@@ -190,6 +202,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **location** | required | Location (e.g. path/to/endpoint?query=string) | string | `endpoint` |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
+**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
 
 #### Action Output
 
@@ -222,6 +235,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **location** | required | Location (e.g. path/to/endpoint?query=string) | string | `endpoint` |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
+**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
 
 #### Action Output
 
@@ -256,6 +270,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **location** | required | Location (e.g. path/to/endpoint?query=string) | string | `endpoint` |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
+**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
 
 #### Action Output
 
@@ -291,6 +306,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **body** | optional | POST body (query string, JSON, etc.) | string | |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
+**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
 
 #### Action Output
 
