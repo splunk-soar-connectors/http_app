@@ -83,6 +83,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **body** | required | PATCH body (query string, JSON, etc.) | string | |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
+**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
 
 #### Action Output
 
@@ -119,6 +120,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **body** | optional | PATCH body (query string, JSON, etc.) | string | |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
+**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
 
 #### Action Output
 
@@ -155,6 +157,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **body** | optional | DELETE body (query string, JSON, etc.) | string | |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
+**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
 
 #### Action Output
 
@@ -190,6 +193,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **location** | required | Location (e.g. path/to/endpoint?query=string) | string | `endpoint` |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
+**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
 
 #### Action Output
 
@@ -222,6 +226,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **location** | required | Location (e.g. path/to/endpoint?query=string) | string | `endpoint` |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
+**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
 
 #### Action Output
 
@@ -256,6 +261,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **location** | required | Location (e.g. path/to/endpoint?query=string) | string | `endpoint` |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
+**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
 
 #### Action Output
 
@@ -291,6 +297,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **body** | optional | POST body (query string, JSON, etc.) | string | |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
+**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
 
 #### Action Output
 

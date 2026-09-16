@@ -448,7 +448,9 @@ class HttpConnector(BaseConnector):
         return phantom.APP_SUCCESS
 
     @classmethod
-    def _safe_response_headers(cls, headers):
+    def _safe_response_headers(cls, headers, expose_sensitive_response_headers=False):
+        if expose_sensitive_response_headers:
+            return dict(headers)
         return {name: value for name, value in headers.items() if name.casefold() not in cls.SENSITIVE_RESPONSE_HEADERS}
 
     def _make_http_call(
@@ -462,6 +464,7 @@ class HttpConnector(BaseConnector):
         data=None,
         files=None,
         use_default_endpoint=False,
+        expose_sensitive_response_headers=False,
     ):
         auth = None
         headers = {} if not headers else headers
@@ -539,13 +542,14 @@ class HttpConnector(BaseConnector):
                 data=data,
                 files=files,
                 use_default_endpoint=use_default_endpoint,
+                expose_sensitive_response_headers=expose_sensitive_response_headers,
             )
 
         # Return success for get headers action as it returns empty response body
         if self.get_action_identifier() == "http_head" and r.status_code == 200:
             resp_data = {"method": method.upper(), "location": url}
             try:
-                resp_data["response_headers"] = self._safe_response_headers(r.headers)
+                resp_data["response_headers"] = self._safe_response_headers(r.headers, expose_sensitive_response_headers)
             except Exception:
                 pass
             action_result.add_data(resp_data)
@@ -571,7 +575,7 @@ class HttpConnector(BaseConnector):
             "response_body": response_body,
         }
         try:
-            resp_data["response_headers"] = self._safe_response_headers(r.headers)
+            resp_data["response_headers"] = self._safe_response_headers(r.headers, expose_sensitive_response_headers)
         except Exception:
             pass
         action_result.add_data(resp_data)
@@ -697,6 +701,7 @@ class HttpConnector(BaseConnector):
             headers=headers,
             verify=param.get("verify_certificate", self._verify),
             data=body,
+            expose_sensitive_response_headers=param.get("expose_sensitive_response_headers") is True,
         )
         return ret_val
 
