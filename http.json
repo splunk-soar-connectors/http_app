@@ -153,7 +153,7 @@
                     "order": 3
                 },
                 "expose_sensitive_response_headers": {
-                    "description": "Include sensitive response headers in action results",
+                    "description": "Include Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2 in action results. Values persist with the container and can be viewed later by container viewers.",
                     "data_type": "boolean",
                     "default": false,
                     "order": 4
@@ -310,7 +310,7 @@
                     "order": 3
                 },
                 "expose_sensitive_response_headers": {
-                    "description": "Include sensitive response headers in action results",
+                    "description": "Include Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2 in action results. Values persist with the container and can be viewed later by container viewers.",
                     "data_type": "boolean",
                     "default": false,
                     "order": 4
@@ -467,7 +467,7 @@
                     "order": 3
                 },
                 "expose_sensitive_response_headers": {
-                    "description": "Include sensitive response headers in action results",
+                    "description": "Include Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2 in action results. Values persist with the container and can be viewed later by container viewers.",
                     "data_type": "boolean",
                     "default": false,
                     "order": 4
@@ -619,7 +619,7 @@
                     "order": 2
                 },
                 "expose_sensitive_response_headers": {
-                    "description": "Include sensitive response headers in action results",
+                    "description": "Include Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2 in action results. Values persist with the container and can be viewed later by container viewers.",
                     "data_type": "boolean",
                     "default": false,
                     "order": 3
@@ -750,7 +750,7 @@
                     "order": 2
                 },
                 "expose_sensitive_response_headers": {
-                    "description": "Include sensitive response headers in action results",
+                    "description": "Include Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2 in action results. Values persist with the container and can be viewed later by container viewers.",
                     "data_type": "boolean",
                     "default": false,
                     "order": 3
@@ -892,7 +892,7 @@
                     "order": 2
                 },
                 "expose_sensitive_response_headers": {
-                    "description": "Include sensitive response headers in action results",
+                    "description": "Include Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2 in action results. Values persist with the container and can be viewed later by container viewers.",
                     "data_type": "boolean",
                     "default": false,
                     "order": 3
@@ -1045,7 +1045,7 @@
                     "order": 3
                 },
                 "expose_sensitive_response_headers": {
-                    "description": "Include sensitive response headers in action results",
+                    "description": "Include Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2 in action results. Values persist with the container and can be viewed later by container viewers.",
                     "data_type": "boolean",
                     "default": false,
                     "order": 4

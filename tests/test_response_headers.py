@@ -67,6 +67,8 @@ class ResponseHeadersTest(unittest.TestCase):
             parameter = action["parameters"]["expose_sensitive_response_headers"]
             self.assertEqual(parameter["data_type"], "boolean")
             self.assertIs(parameter["default"], False)
+            self.assertIn("Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2", parameter["description"])
+            self.assertIn("container viewers", parameter["description"])
 
 
 if __name__ == "__main__":
