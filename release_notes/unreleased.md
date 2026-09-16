@@ -1,2 +1,1 @@
 **Unreleased**
-* Added an action-level opt-in to include Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2 response headers in action results. The option is disabled by default; when enabled, the values persist with the container and remain available to users with container-view access.
