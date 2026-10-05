@@ -4,7 +4,7 @@ Publisher: Splunk <br>
 Connector Version: 4.0.2 <br>
 Product Vendor: Generic <br>
 Product Name: HTTP <br>
-Minimum Product Version: 6.2.1
+Minimum Product Version: 6.3.0
 
 This App facilitates making HTTP requests as actions
 
@@ -115,6 +115,7 @@ action_result.summary.status_code | numeric | | 404 |
 action_result.message | string | | Can't process response from server. Status Code: 404 Data from server: {"failed": true, "message": "Requested item not found"} |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 0 |
+action_result.parameter.expose_sensitive_response_headers | boolean | | |
 
 ## action: 'patch data'
 
@@ -152,6 +153,7 @@ action_result.summary.status_code | numeric | | 404 |
 action_result.message | string | | Can't process response from server. Status Code: 404 Data from server: {"failed": true, "message": "Requested item not found"} |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 0 |
+action_result.parameter.expose_sensitive_response_headers | boolean | | |
 
 ## action: 'delete data'
 
@@ -189,6 +191,7 @@ action_result.summary.status_code | numeric | | 404 |
 action_result.message | string | | Can't process response from server. Status Code: 404 Data from server: {"failed": true, "message": "Requested item not found"} |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 0 |
+action_result.parameter.expose_sensitive_response_headers | boolean | | |
 
 ## action: 'get headers'
 
@@ -222,6 +225,7 @@ action_result.summary.status_code | numeric | | 200 |
 action_result.message | string | | Status code: 200, Reason: OK |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
+action_result.parameter.expose_sensitive_response_headers | boolean | | |
 
 ## action: 'get options'
 
@@ -257,6 +261,7 @@ action_result.summary.status_code | numeric | | 200 |
 action_result.message | string | | Status code: 200, Reason: OK |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
+action_result.parameter.expose_sensitive_response_headers | boolean | | |
 
 ## action: 'get data'
 
@@ -292,6 +297,7 @@ action_result.summary.status_code | numeric | | 404 |
 action_result.message | string | | Can't process response from server. Status Code: 404 Data from server: {"failed": true, "message": "Requested item not found"} |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 0 |
+action_result.parameter.expose_sensitive_response_headers | boolean | | |
 
 ## action: 'post data'
 
@@ -329,6 +335,7 @@ action_result.summary.status_code | numeric | | 404 |
 action_result.message | string | | Can't process response from server. Status Code: 404 Data from server: {"failed": true, "message": "Requested item not found"} |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 0 |
+action_result.parameter.expose_sensitive_response_headers | boolean | | |
 
 ## action: 'get file'
 
