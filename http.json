@@ -16,7 +16,7 @@
     "product_vendor": "Generic",
     "product_name": "HTTP",
     "product_version_regex": ".*",
-    "min_phantom_version": "6.2.1",
+    "min_phantom_version": "6.3.0",
     "license": "Copyright (c) 2016-2026 Splunk Inc.",
     "logo": "logo_splunk.svg",
     "logo_dark": "logo_splunk_dark.svg",
@@ -269,6 +269,10 @@
                     "example_values": [
                         0
                     ]
+                },
+                {
+                    "data_path": "action_result.parameter.expose_sensitive_response_headers",
+                    "data_type": "boolean"
                 }
             ],
             "render": {
@@ -426,6 +430,10 @@
                     "example_values": [
                         0
                     ]
+                },
+                {
+                    "data_path": "action_result.parameter.expose_sensitive_response_headers",
+                    "data_type": "boolean"
                 }
             ],
             "render": {
@@ -583,6 +591,10 @@
                     "example_values": [
                         0
                     ]
+                },
+                {
+                    "data_path": "action_result.parameter.expose_sensitive_response_headers",
+                    "data_type": "boolean"
                 }
             ],
             "render": {
@@ -714,6 +726,10 @@
                     "example_values": [
                         1
                     ]
+                },
+                {
+                    "data_path": "action_result.parameter.expose_sensitive_response_headers",
+                    "data_type": "boolean"
                 }
             ],
             "render": {
@@ -856,6 +872,10 @@
                     "example_values": [
                         1
                     ]
+                },
+                {
+                    "data_path": "action_result.parameter.expose_sensitive_response_headers",
+                    "data_type": "boolean"
                 }
             ],
             "render": {
@@ -1007,6 +1027,10 @@
                     "example_values": [
                         0
                     ]
+                },
+                {
+                    "data_path": "action_result.parameter.expose_sensitive_response_headers",
+                    "data_type": "boolean"
                 }
             ],
             "versions": "EQ(*)"
@@ -1167,6 +1191,10 @@
                     "example_values": [
                         0
                     ]
+                },
+                {
+                    "data_path": "action_result.parameter.expose_sensitive_response_headers",
+                    "data_type": "boolean"
                 }
             ],
             "versions": "EQ(*)"
