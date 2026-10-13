@@ -4,11 +4,13 @@ Publisher: Splunk <br>
 Connector Version: 4.0.2 <br>
 Product Vendor: Generic <br>
 Product Name: HTTP <br>
-Minimum Product Version: 6.2.1
+Minimum Product Version: 6.3.0
 
 This App facilitates making HTTP requests as actions
 
-For security reasons, accessing 127.0.0.1 is not allowed.
+Initial asset and file-action destinations cannot resolve to loopback or unspecified addresses. Redirects follow Requests' standard handling.
+
+HTTP actions honor the asset's `HTTP_PROXY`, `HTTPS_PROXY`, and `NO_PROXY` environment variables. The proxy resolves proxied destination names; direct connections validate destination DNS on the SOAR host before dispatch. Configure the proxy to block internal destinations that only the proxy can resolve.
 
 This app requires access to port 80(for request send over HTTP) or port 443(for request send over
 HTTPS) on your Phantom host(s) in order to function.
@@ -92,7 +94,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **body** | required | PATCH body (query string, JSON, etc.) | string | |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
-**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
+**expose_sensitive_response_headers** | optional | Include Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2 in action results. Values persist with the container and can be viewed later by container viewers. | boolean | |
 
 #### Action Output
 
@@ -113,6 +115,7 @@ action_result.summary.status_code | numeric | | 404 |
 action_result.message | string | | Can't process response from server. Status Code: 404 Data from server: {"failed": true, "message": "Requested item not found"} |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 0 |
+action_result.parameter.expose_sensitive_response_headers | boolean | | |
 
 ## action: 'patch data'
 
@@ -129,7 +132,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **body** | optional | PATCH body (query string, JSON, etc.) | string | |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
-**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
+**expose_sensitive_response_headers** | optional | Include Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2 in action results. Values persist with the container and can be viewed later by container viewers. | boolean | |
 
 #### Action Output
 
@@ -150,6 +153,7 @@ action_result.summary.status_code | numeric | | 404 |
 action_result.message | string | | Can't process response from server. Status Code: 404 Data from server: {"failed": true, "message": "Requested item not found"} |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 0 |
+action_result.parameter.expose_sensitive_response_headers | boolean | | |
 
 ## action: 'delete data'
 
@@ -166,7 +170,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **body** | optional | DELETE body (query string, JSON, etc.) | string | |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
-**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
+**expose_sensitive_response_headers** | optional | Include Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2 in action results. Values persist with the container and can be viewed later by container viewers. | boolean | |
 
 #### Action Output
 
@@ -187,6 +191,7 @@ action_result.summary.status_code | numeric | | 404 |
 action_result.message | string | | Can't process response from server. Status Code: 404 Data from server: {"failed": true, "message": "Requested item not found"} |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 0 |
+action_result.parameter.expose_sensitive_response_headers | boolean | | |
 
 ## action: 'get headers'
 
@@ -202,7 +207,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **location** | required | Location (e.g. path/to/endpoint?query=string) | string | `endpoint` |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
-**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
+**expose_sensitive_response_headers** | optional | Include Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2 in action results. Values persist with the container and can be viewed later by container viewers. | boolean | |
 
 #### Action Output
 
@@ -220,6 +225,7 @@ action_result.summary.status_code | numeric | | 200 |
 action_result.message | string | | Status code: 200, Reason: OK |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
+action_result.parameter.expose_sensitive_response_headers | boolean | | |
 
 ## action: 'get options'
 
@@ -235,7 +241,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **location** | required | Location (e.g. path/to/endpoint?query=string) | string | `endpoint` |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
-**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
+**expose_sensitive_response_headers** | optional | Include Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2 in action results. Values persist with the container and can be viewed later by container viewers. | boolean | |
 
 #### Action Output
 
@@ -255,6 +261,7 @@ action_result.summary.status_code | numeric | | 200 |
 action_result.message | string | | Status code: 200, Reason: OK |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 1 |
+action_result.parameter.expose_sensitive_response_headers | boolean | | |
 
 ## action: 'get data'
 
@@ -270,7 +277,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **location** | required | Location (e.g. path/to/endpoint?query=string) | string | `endpoint` |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
-**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
+**expose_sensitive_response_headers** | optional | Include Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2 in action results. Values persist with the container and can be viewed later by container viewers. | boolean | |
 
 #### Action Output
 
@@ -290,6 +297,7 @@ action_result.summary.status_code | numeric | | 404 |
 action_result.message | string | | Can't process response from server. Status Code: 404 Data from server: {"failed": true, "message": "Requested item not found"} |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 0 |
+action_result.parameter.expose_sensitive_response_headers | boolean | | |
 
 ## action: 'post data'
 
@@ -306,7 +314,7 @@ PARAMETER | REQUIRED | DESCRIPTION | TYPE | CONTAINS
 **body** | optional | POST body (query string, JSON, etc.) | string | |
 **verify_certificate** | optional | Verify certificates (if using HTTPS) | boolean | |
 **headers** | optional | Additional headers (JSON object with headers) | string | |
-**expose_sensitive_response_headers** | optional | Include sensitive response headers in action results | boolean | |
+**expose_sensitive_response_headers** | optional | Include Authorization, Cookie, Proxy-Authenticate, Set-Cookie, and Set-Cookie2 in action results. Values persist with the container and can be viewed later by container viewers. | boolean | |
 
 #### Action Output
 
@@ -327,6 +335,7 @@ action_result.summary.status_code | numeric | | 404 |
 action_result.message | string | | Can't process response from server. Status Code: 404 Data from server: {"failed": true, "message": "Requested item not found"} |
 summary.total_objects | numeric | | 1 |
 summary.total_objects_successful | numeric | | 0 |
+action_result.parameter.expose_sensitive_response_headers | boolean | | |
 
 ## action: 'get file'
 
